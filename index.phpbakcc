@@ -1,0 +1,12 @@
+<?php
+// Prueba básica de funcionamiento
+echo "Prueba de Laravel<br>";
+
+// Verifica autoload básico
+try {
+    // Intenta cargar una clase de ejemplo
+    $test = new stdClass();
+    echo "Autoload funcionando";
+} catch (Exception $e) {
+    echo "Error de autoload: " . $e->getMessage();
+}

@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Regla para eliminar public de la URL
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    # Proteger archivos sensibles
+    <FilesMatch "^(\.htaccess|\.env|composer\.json|composer\.lock)$">
+        Order Allow,Deny
+        Deny from all
+    </FilesMatch>
+</IfModule>

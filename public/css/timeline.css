@@ -1,0 +1,761 @@
+/* Timeline de oportunidades y seguimientos - Versión Premium */
+:root {
+    --color-won: #10b981;
+    --color-lost: #ef4444;
+    --color-negotiation: #3b82f6;
+    --color-called: #6366f1;
+    --color-whatsapp: #10b981;
+    --color-email: #f59e0b;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Timeline principal con efecto de gradiente */
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+  }
+  
+  /* Línea principal con efecto de brillo */
+  .absolute.left-4.top-0.bottom-0.w-0.5.bg-gray-200 {
+    background: linear-gradient(to bottom, 
+        rgba(229, 231, 235, 0.2) 0%, 
+        rgba(229, 231, 235, 0.8) 50%,
+        rgba(229, 231, 235, 0.2) 100%);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Estilos para las oportunidades con efecto de elevación */
+  .oportunidad {
+    position: relative;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    transform-origin: center;
+  }
+  
+  .oportunidad:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  /* Líneas verticales con efecto de gradiente */
+  .oportunidad.won::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 24px;
+    bottom: -30px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-won) 0%, rgba(16, 185, 129, 0.3) 100%);
+    z-index: 0;
+    animation: pulseWon 3s infinite alternate;
+  }
+  
+  .oportunidad.lost::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 24px;
+    bottom: -30px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-lost) 0%, rgba(239, 68, 68, 0.3) 100%);
+    z-index: 0;
+    animation: pulseLost 3s infinite alternate;
+  }
+  
+  .oportunidad.negotiation::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 24px;
+    bottom: -30px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-negotiation) 0%, rgba(59, 130, 246, 0.3) 100%);
+    z-index: 0;
+    animation: pulseNegotiation 3s infinite alternate;
+  }
+  
+  @keyframes pulseWon {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes pulseLost {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  @keyframes pulseNegotiation {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+  
+  /* Último elemento sin línea extendida */
+  .oportunidad:last-child::before {
+    display: none;
+  }
+  
+  /* Marcadores con efecto de brillo */
+  .oportunidad-marker {
+    position: absolute;
+    left: -30px;
+    top: 12px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    transition: transform var(--transition-normal);
+  }
+  
+  .oportunidad-marker.won { 
+    background: radial-gradient(circle at 30% 30%, #34d399, var(--color-won));
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2), 0 0 10px rgba(16, 185, 129, 0.4);
+    animation: glowWon 2s infinite alternate;
+  }
+  
+  .oportunidad-marker.lost { 
+    background: radial-gradient(circle at 30% 30%, #f87171, var(--color-lost));
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 10px rgba(239, 68, 68, 0.4);
+    animation: glowLost 2s infinite alternate;
+  }
+  
+  .oportunidad-marker.negotiation { 
+    background: radial-gradient(circle at 30% 30%, #60a5fa, var(--color-negotiation));
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 10px rgba(59, 130, 246, 0.4);
+    animation: glowNegotiation 2s infinite alternate;
+  }
+  
+  @keyframes glowWon {
+    0% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2), 0 0 5px rgba(16, 185, 129, 0.3); }
+    100% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3), 0 0 15px rgba(16, 185, 129, 0.5); }
+  }
+  
+  @keyframes glowLost {
+    0% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 5px rgba(239, 68, 68, 0.3); }
+    100% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3), 0 0 15px rgba(239, 68, 68, 0.5); }
+  }
+  
+  @keyframes glowNegotiation {
+    0% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2), 0 0 5px rgba(59, 130, 246, 0.3); }
+    100% { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3), 0 0 15px rgba(59, 130, 246, 0.5); }
+  }
+  
+  .oportunidad:hover .oportunidad-marker {
+    transform: translateX(-50%) scale(1.2);
+  }
+  
+  /* Cabeceras con efecto de gradiente y borde */
+  .oportunidad-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .oportunidad-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.5), transparent);
+  }
+  
+  .oportunidad-header.won { 
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    border-left: 4px solid var(--color-won);
+  }
+  
+  .oportunidad-header.lost { 
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+    border-left: 4px solid var(--color-lost);
+  }
+  
+  .oportunidad-header.negotiation { 
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+    border-left: 4px solid var(--color-negotiation);
+  }
+  
+  .oportunidad-header:hover {
+    background-position: right center;
+  }
+  
+  .oportunidad-header.won:hover { 
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+  }
+  
+  .oportunidad-header.lost:hover { 
+    background: linear-gradient(to right, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+  }
+  
+  .oportunidad-header.negotiation:hover { 
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+  }
+  
+  /* Título con efecto de texto */
+  .oportunidad-title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform var(--transition-fast);
+  }
+  
+  .oportunidad-header:hover .oportunidad-title {
+    transform: translateX(3px);
+  }
+  
+  /* Badges con efecto de brillo y sombra */
+  .oportunidad-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .oportunidad-badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: all 0.8s ease;
+  }
+  
+  .oportunidad-badge:hover::after {
+    left: 100%;
+  }
+  
+  .oportunidad-badge.won { 
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .oportunidad-badge.lost { 
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .oportunidad-badge.negotiation { 
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Botón de toggle con animación */
+  .oportunidad-toggle {
+    font-size: 16px;
+    transition: all var(--transition-normal);
+    color: #6b7280;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .oportunidad-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+  }
+  
+  .oportunidad-toggle.active {
+    transform: rotate(180deg);
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Contenido con animación suave */
+  .oportunidad-content {
+    background-color: white;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height var(--transition-slow), opacity var(--transition-normal);
+    opacity: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+  
+  .oportunidad-content.active {
+    max-height: 2000px;
+    opacity: 1;
+    transition: max-height var(--transition-slow), opacity var(--transition-normal) 0.2s;
+  }
+  
+  /* Contenedor de seguimientos con efecto de profundidad */
+  .seguimientos-container {
+    position: relative;
+    padding: 20px;
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+  }
+  
+  .seguimientos-timeline {
+    position: relative;
+    padding-left: 25px;
+  }
+  
+  /* Líneas de seguimiento con efecto de gradiente */
+  .oportunidad.won .seguimientos-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-won) 0%, rgba(16, 185, 129, 0.3) 100%);
+    border-radius: 1px;
+  }
+  
+  .oportunidad.lost .seguimientos-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-lost) 0%, rgba(239, 68, 68, 0.3) 100%);
+    border-radius: 1px;
+  }
+  
+  .oportunidad.negotiation .seguimientos-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-negotiation) 0%, rgba(59, 130, 246, 0.3) 100%);
+    border-radius: 1px;
+  }
+  
+  /* Seguimientos con efecto de aparición */
+  .seguimiento {
+    position: relative;
+    padding: 10px 0;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: fadeInRight 0.5s forwards;
+    animation-delay: calc(var(--index, 0) * 0.1s);
+  }
+  
+  .oportunidad-content.active .seguimiento:nth-child(1) { --index: 1; }
+  .oportunidad-content.active .seguimiento:nth-child(2) { --index: 2; }
+  .oportunidad-content.active .seguimiento:nth-child(3) { --index: 3; }
+  .oportunidad-content.active .seguimiento:nth-child(4) { --index: 4; }
+  .oportunidad-content.active .seguimiento:nth-child(5) { --index: 5; }
+  .oportunidad-content.active .seguimiento:nth-child(6) { --index: 6; }
+  .oportunidad-content.active .seguimiento:nth-child(7) { --index: 7; }
+  .oportunidad-content.active .seguimiento:nth-child(8) { --index: 8; }
+  .oportunidad-content.active .seguimiento:nth-child(9) { --index: 9; }
+  .oportunidad-content.active .seguimiento:nth-child(10) { --index: 10; }
+  
+  @keyframes fadeInRight {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .seguimiento:not(:last-child) {
+    margin-bottom: 15px;
+  }
+  
+  .seguimiento:hover {
+    transform: translateX(3px);
+  }
+  
+  /* Marcadores de seguimiento con efecto de brillo */
+  .oportunidad.won .seguimiento-marker {
+    position: absolute;
+    left: -25px;
+    top: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #34d399, var(--color-won));
+    transform: translateX(-50%);
+    z-index: 1;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    transition: all var(--transition-normal);
+  }
+  
+  .oportunidad.lost .seguimiento-marker {
+    position: absolute;
+    left: -25px;
+    top: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #f87171, var(--color-lost));
+    transform: translateX(-50%);
+    z-index: 1;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+    transition: all var(--transition-normal);
+  }
+  
+  .oportunidad.negotiation .seguimiento-marker {
+    position: absolute;
+    left: -25px;
+    top: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #60a5fa, var(--color-negotiation));
+    transform: translateX(-50%);
+    z-index: 1;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    transition: all var(--transition-normal);
+  }
+  
+  .seguimiento:hover .seguimiento-marker {
+    transform: translateX(-50%) scale(1.3);
+  }
+  
+  /* Contenido de seguimiento con efecto de elevación */
+  .seguimiento-content {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .seguimiento-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.05), transparent);
+  }
+  
+  .seguimiento:hover .seguimiento-content {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  
+  /* Cabecera de seguimiento con mejor espaciado */
+  .seguimiento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+  
+  /* Tipos de seguimiento con efecto de gradiente */
+  .seguimiento-tipo {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .seguimiento-tipo::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: all 0.8s ease;
+  }
+  
+  .seguimiento-tipo:hover::after {
+    left: 100%;
+  }
+  
+  .seguimiento-tipo.called { 
+    background: linear-gradient(135deg, var(--color-called), #4f46e5);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .seguimiento-tipo.whatsapp { 
+    background: linear-gradient(135deg, var(--color-whatsapp), #059669);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .seguimiento-tipo.emailed { 
+    background: linear-gradient(135deg, var(--color-email), #d97706);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .seguimiento-tipo.visited { 
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Comentario con mejor tipografía */
+  .seguimiento-comentario {
+    color: #374151;
+    margin-bottom: 8px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  
+  /* Acción con estilo distintivo */
+  .seguimiento-accion {
+    font-size: 13px;
+    color: #6b7280;
+    font-style: italic;
+    padding-top: 5px;
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+    margin-top: 5px;
+  }
+  
+  /* Línea divisoria entre cotizaciones */
+  .cotizacion-divider {
+    position: relative;
+    margin: 20px 0;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 15px;
+  }
+  
+  .cotizacion-divider::before,
+  .cotizacion-divider::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(220, 38, 38, 0.7), transparent);
+  }
+  
+  .cotizacion-divider span {
+    padding: 5px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #dc2626;
+    background-color: #fff;
+    border-radius: 20px;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .cotizacion-divider span::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+    border-radius: 20px;
+    z-index: -1;
+  }
+  
+  /* Información de cierre con efecto de tarjeta */
+  .cierre-info {
+    background: linear-gradient(to bottom right, white, #f9fafb);
+    border-radius: 10px;
+    padding: 18px;
+    margin: 15px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .cierre-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .cierre-info:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  
+  .cierre-info-title {
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+  }
+  
+  .cierre-info-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+  }
+  
+  .cierre-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    font-size: 14px;
+  }
+  
+  .cierre-info-item {
+    margin-bottom: 8px;
+    transition: transform var(--transition-fast);
+  }
+  
+  .cierre-info-item:hover {
+    transform: translateX(3px);
+  }
+  
+  .cierre-info-label {
+    display: block;
+    color: #6b7280;
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  .cierre-info-value {
+    font-weight: 600;
+    color: #374151;
+    padding: 3px 0;
+  }
+  
+  .cierre-info-full {
+    grid-column: span 2;
+  }
+  
+  /* Estado vacío con mejor estilo */
+  .empty-state {
+    text-align: center;
+    padding: 40px 0;
+    background: linear-gradient(to bottom, white, #f9fafb);
+    border-radius: 10px;
+    margin: 15px;
+  }
+  
+  .empty-state-text {
+    color: #6b7280;
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+  
+  .empty-state-subtext {
+    color: #9ca3af;
+    font-size: 14px;
+    margin-top: 8px;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+  
+  /* Efectos de scroll suave */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Efectos de selección de texto */
+  ::selection {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #1e3a8a;
+  }
+  
+  /* Efectos de focus para accesibilidad */
+  :focus {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+  
+  /* Mejoras para dispositivos móviles */
+  @media (max-width: 768px) {
+    .oportunidad {
+      margin-left: 10px;
+    }
+    
+    .cierre-info-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .cierre-info-full {
+      grid-column: span 1;
+    }
+  }
+  
+  /* Animación de carga para mejorar la experiencia de usuario */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  .loading {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+    background-size: 1000px 100%;
+  }
+
+  .btn-cierre-oportunidad {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: white;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+  }
+
+  .btn-cierre-oportunidad:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  }
+
+  .btn-cierre-oportunidad i {
+    font-size: 12px;
+  }
