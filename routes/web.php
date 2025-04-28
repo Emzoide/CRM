@@ -147,6 +147,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/tiendas', [App\Http\Controllers\Admin\TiendaController::class, 'store'])->name('tiendas.store');
     Route::put('/tiendas/{tienda}', [App\Http\Controllers\Admin\TiendaController::class, 'update'])->name('tiendas.update');
     Route::delete('/tiendas/{tienda}', [App\Http\Controllers\Admin\TiendaController::class, 'destroy'])->name('tiendas.destroy');
+
+    // Rutas para vehículos
+    Route::get('/vehiculos', [App\Http\Controllers\Admin\VehiculoController::class, 'index'])->name('vehiculos');
+
+    // Rutas para marcas
+    Route::post('/vehiculos/marca', [App\Http\Controllers\Admin\VehiculoController::class, 'storeMarca'])->name('vehiculos.marca.store');
+    Route::put('/vehiculos/marca/{marca}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateMarca'])->name('vehiculos.marca.update');
+    Route::delete('/vehiculos/marca/{marca}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyMarca'])->name('vehiculos.marca.destroy');
+
+    // Rutas para modelos
+    Route::post('/vehiculos/modelo', [App\Http\Controllers\Admin\VehiculoController::class, 'storeModelo'])->name('vehiculos.modelo.store');
+    Route::put('/vehiculos/modelo/{modelo}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateModelo'])->name('vehiculos.modelo.update');
+    Route::delete('/vehiculos/modelo/{modelo}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyModelo'])->name('vehiculos.modelo.destroy');
+
+    // Rutas para versiones
+    Route::post('/vehiculos/version', [App\Http\Controllers\Admin\VehiculoController::class, 'storeVersion'])->name('vehiculos.version.store');
+    Route::put('/vehiculos/version/{version}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateVersion'])->name('vehiculos.version.update');
+    Route::delete('/vehiculos/version/{version}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyVersion'])->name('vehiculos.version.destroy');
 });
 
 // Ruta de depuración (protegida)

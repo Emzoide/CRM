@@ -26,7 +26,7 @@ class VersionVehiculoController extends Controller
         $data = $request->validate([
             'modelo_id' => 'required|exists:modelos,id',
             'nombre' => 'required|string|max:60',
-            'anio' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'anio' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
         ]);
 
         VersionVehiculo::create($data);
@@ -54,7 +54,7 @@ class VersionVehiculoController extends Controller
         $data = $request->validate([
             'modelo_id' => 'required|exists:modelos,id',
             'nombre' => 'required|string|max:60',
-            'anio' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'anio' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
         ]);
 
         $version->update($data);
