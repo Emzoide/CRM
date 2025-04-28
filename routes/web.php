@@ -12,7 +12,10 @@ use App\Http\Controllers\SeguimientoController;
 use App\Http\Controllers\OportunidadCierreController;
 use App\Http\Controllers\CotizacionGestionController;
 use App\Http\Controllers\BitacoraEtapasOportunidadController;
+use App\Http\Controllers\TiendaController;
+use App\Http\Controllers\SucursalController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\SucursalController as AdminSucursalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,6 +129,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', function () {
         return view('profile.show');
     })->name('profile.show');
+
+    // Tiendas y Sucursales
+    Route::resource('tiendas', TiendaController::class);
+    Route::resource('sucursales', SucursalController::class);
+
+    Route::get('/admin/sucursales', [AdminSucursalController::class, 'index'])->name('admin.sucursales');
+});
+
+// Rutas para sucursales y tiendas
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/tiendas', [App\Http\Controllers\Admin\TiendaController::class, 'index'])->name('tiendas');
+    Route::post('/sucursales', [App\Http\Controllers\Admin\SucursalController::class, 'store'])->name('sucursales.store');
+    Route::put('/sucursales/{sucursal}', [App\Http\Controllers\Admin\SucursalController::class, 'update'])->name('sucursales.update');
+    Route::delete('/sucursales/{sucursal}', [App\Http\Controllers\Admin\SucursalController::class, 'destroy'])->name('sucursales.destroy');
+
+    Route::post('/tiendas', [App\Http\Controllers\Admin\TiendaController::class, 'store'])->name('tiendas.store');
+    Route::put('/tiendas/{tienda}', [App\Http\Controllers\Admin\TiendaController::class, 'update'])->name('tiendas.update');
+    Route::delete('/tiendas/{tienda}', [App\Http\Controllers\Admin\TiendaController::class, 'destroy'])->name('tiendas.destroy');
 });
 
 // Ruta de depuración (protegida)
