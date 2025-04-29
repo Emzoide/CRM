@@ -87,21 +87,21 @@
     </div>
 
     <div class="admin-menu-grid">
-        <a href="#" class="admin-menu-card">
+        <a href="{{ route('admin.sucursales') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
                 <i class="fas fa-store"></i>
             </div>
             <h2 class="admin-menu-title">Sucursales</h2>
         </a>
 
-        <a href="#" class="admin-menu-card">
+        <a href="{{ route('admin.vehiculos') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
                 <i class="fas fa-car"></i>
             </div>
             <h2 class="admin-menu-title">Vehículos</h2>
         </a>
 
-        <a href="#" class="admin-menu-card">
+        <a href="{{ route('admin.usuarios.index') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
                 <i class="fas fa-users"></i>
             </div>

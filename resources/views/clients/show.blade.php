@@ -20,7 +20,12 @@
         <i class="fas fa-user" style="margin: auto"></i>
       </div>
       <div>
-        <h1 class="text-2xl font-semibold">{{ $cliente->nombre }}</h1>
+        <h1 class="cliente-nombre">
+          {{ $cliente->nombre }}
+          @if($cliente->occupation)
+          <span class="cliente-ocupacion">({{ $cliente->occupation }})</span>
+          @endif
+        </h1>
         <div class="mt-1 space-y-1 text-gray-600">
           <div>DNI/RUC: <span class="font-medium">{{ $cliente->dni_ruc }}</span></div>
           <div>Canal: <span class="font-medium">{{ $cliente->canal->nombre ?? '—' }}</span></div>
@@ -156,7 +161,7 @@
                   class="btn-historial-cotizaciones">
                   <i class="fas fa-history"></i>
                   <span>Ver Historial de Cotizaciones</span>
-                </button> 
+                </button>
               </div>
               @if(in_array($opp->etapa_actual, ['won','lost']))
               <div class="cierre-info-grid">
@@ -407,6 +412,20 @@
     font-weight: 600;
     color: #374151;
     margin: 0;
+  }
+
+  .cliente-nombre {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    color: #1f2937;
+  }
+
+  .cliente-ocupacion {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #6b7280;
+    margin-left: 0.5em;
   }
 </style>
 @endpush

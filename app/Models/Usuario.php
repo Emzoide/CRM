@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
 class Usuario extends Authenticatable
 {
@@ -16,6 +17,7 @@ class Usuario extends Authenticatable
         'login',
         'first_name',
         'last_name',
+        'email',
         'password_hash',
         'rol',
         'tienda_id',
@@ -23,6 +25,7 @@ class Usuario extends Authenticatable
         'activo',
         'last_login',
         'remember_token',
+        'full_name',
     ];
 
     // 2) Campos ocultos al serializar
@@ -39,7 +42,7 @@ class Usuario extends Authenticatable
 
     // 4) Atributos virtuales para serializar
     protected $appends = [
-        'nombre_completo',
+        'full_name',
     ];
 
     // Relaciones
@@ -64,7 +67,7 @@ class Usuario extends Authenticatable
     }
 
     // 5) Accessor: concatena first_name + last_name
-    public function getNombreCompletoAttribute(): string
+    public function getFullNameAttribute(): string
     {
         return trim("{$this->first_name} {$this->last_name}");
     }

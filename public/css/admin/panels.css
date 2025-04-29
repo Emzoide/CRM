@@ -636,12 +636,12 @@
     background: white;
 }
 
-/* Estilos para los switches */
+/* Estilos para el switch de activación */
 .admin-switch {
     position: relative;
     display: inline-block;
-    width: 50px;
-    height: 24px;
+    width: 60px;
+    height: 34px;
 }
 
 .admin-switch input {
@@ -650,7 +650,7 @@
     height: 0;
 }
 
-.admin-switch .slider {
+.admin-switch-label {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -659,14 +659,14 @@
     bottom: 0;
     background-color: #ccc;
     transition: .4s;
-    border-radius: 24px;
+    border-radius: 34px;
 }
 
-.admin-switch .slider:before {
+.admin-switch-label:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
+    height: 26px;
+    width: 26px;
     left: 4px;
     bottom: 4px;
     background-color: white;
@@ -674,12 +674,20 @@
     border-radius: 50%;
 }
 
-.admin-switch input:checked + .slider {
-    background-color: #4e73df;
+.admin-switch input:checked + .admin-switch-label {
+    background-color: #2196F3;
 }
 
-.admin-switch input:checked + .slider:before {
+.admin-switch input:checked + .admin-switch-label:before {
     transform: translateX(26px);
+}
+
+.admin-switch-state {
+    position: absolute;
+    left: 70px;
+    top: 8px;
+    color: #666;
+    font-size: 14px;
 }
 
 /* Estilos para los tooltips personalizados */

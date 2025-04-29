@@ -69,25 +69,25 @@
                         </a>
                         <ul class="sidebar-submenu">
                             <li class="sidebar-submenu-item">
-                                <a href="#" class="sidebar-submenu-link">
+                                <a href="{{ route('admin.tiendas') }}" class="sidebar-submenu-link">
                                     <i class="fas fa-store sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Sucursales</span>
                                 </a>
                             </li>
                             <li class="sidebar-submenu-item">
-                                <a href="#" class="sidebar-submenu-link">
+                                <a href="{{ route('admin.vehiculos') }}" class="sidebar-submenu-link">
                                     <i class="fas fa-car sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Vehículos</span>
                                 </a>
                             </li>
                             <li class="sidebar-submenu-item">
-                                <a href="#" class="sidebar-submenu-link">
+                                <a href="{{ route('admin.usuarios.index') }}" class="sidebar-submenu-link">
                                     <i class="fas fa-users sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Usuarios</span>
                                 </a>
                             </li>
                             <li class="sidebar-submenu-item">
-                                <a href="#" class="sidebar-submenu-link">
+                                <a href="{{ route('admin.menus') }}" class="sidebar-submenu-link">
                                     <i class="fas fa-ellipsis-h sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Otros</span>
                                 </a>
@@ -150,7 +150,8 @@
         $roles = [
         'admin' => 'Administrador',
         'seller' => 'Asesor',
-        'user' => 'Usuario'
+        'user' => 'Usuario',
+        'supervisor'=> 'Supervisor'
         ];
         @endphp
         <!-- Perfil de Usuario -->

@@ -16,6 +16,7 @@ use App\Http\Controllers\TiendaController;
 use App\Http\Controllers\SucursalController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\SucursalController as AdminSucursalController;
+use App\Http\Controllers\UsuarioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,13 +40,17 @@ Route::post('/login', function (Request $request) {
         'password' => 'required',
     ]);
 
-    if (Auth::attempt($credentials, $request->has('remember'))) {
+    if (Auth::attempt(array_merge($credentials, ['activo' => true]), $request->has('remember'))) {
         $request->session()->regenerate();
+        // Actualizar last_login
+        $usuario = Auth::user();
+        $usuario->last_login = now();
+        $usuario->save();
         return redirect()->intended('/');
     }
 
     return back()->withErrors([
-        'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
+        'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros o el usuario está inactivo.',
     ])->withInput($request->only('email'));
 })->name('login.submit');
 
@@ -138,7 +143,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Rutas para sucursales y tiendas
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/tiendas', [App\Http\Controllers\Admin\TiendaController::class, 'index'])->name('tiendas');
     Route::post('/sucursales', [App\Http\Controllers\Admin\SucursalController::class, 'store'])->name('sucursales.store');
     Route::put('/sucursales/{sucursal}', [App\Http\Controllers\Admin\SucursalController::class, 'update'])->name('sucursales.update');
@@ -165,6 +170,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/vehiculos/version', [App\Http\Controllers\Admin\VehiculoController::class, 'storeVersion'])->name('vehiculos.version.store');
     Route::put('/vehiculos/version/{version}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateVersion'])->name('vehiculos.version.update');
     Route::delete('/vehiculos/version/{version}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyVersion'])->name('vehiculos.version.destroy');
+
+    // Rutas para usuarios
+    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+    Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
+    Route::delete('/usuarios/{usuario}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
 });
 
 // Ruta de depuración (protegida)
