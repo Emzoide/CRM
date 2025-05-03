@@ -17,7 +17,7 @@ use App\Http\Controllers\SucursalController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\SucursalController as AdminSucursalController;
 use App\Http\Controllers\UsuarioController;
-
+use App\Http\Controllers\Chat\PanelController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -140,6 +140,21 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('sucursales', SucursalController::class);
 
     Route::get('/admin/sucursales', [AdminSucursalController::class, 'index'])->name('admin.sucursales');
+
+
+    // Ruta para actualizar el último acceso
+    Route::post('/user/heartbeat', function () {
+        $user = auth()->user();
+        if ($user) {
+            $user->last_login = now();
+            $user->save();
+            return response()->json(['status' => 'success']);
+        }
+        return response()->json(['status' => 'error'], 401);
+    })->name('user.heartbeat');
+
+    Route::get('chat', [PanelController::class,'index']);
+
 });
 
 // Rutas para sucursales y tiendas

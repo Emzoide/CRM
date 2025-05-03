@@ -108,21 +108,29 @@
                                         @php
                                         $now = now();
                                         $diff = $now->diffInMinutes($usuario->last_login);
-
-                                        if ($diff < 1) {
-                                            echo 'Hace un instante' ;
-                                            } elseif ($diff < 60) {
-                                            echo $diff==1 ? 'Hace 1 minuto' : "Hace {$diff} minutos" ;
-                                            } elseif ($diff < 1440) { // 24 horas
-                                            $hours=floor($diff / 60);
-                                            echo $hours==1 ? 'Hace 1 hora' : "Hace {$hours} horas" ;
-                                            } else {
-                                            echo $usuario->last_login->format('d/m/Y \a \l\a\s H:i');
-                                            }
+                                        $isOnline = $diff < 5; // Consideramos en línea si su último acceso fue hace menos de 5 minutos
                                             @endphp
+                                            @if($isOnline)
+                                            <span class="admin-badge admin-badge-success">
+                                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 5px;"></i> En línea
+                                            </span>
                                             @else
-                                            <span class="text-muted">No disponible</span>
-                                            @endif
+                                            @php
+                                            if ($diff < 1) {
+                                                echo 'Hace un instante' ;
+                                                } elseif ($diff < 60) {
+                                                echo $diff==1 ? 'Hace 1 minuto' : "Hace {$diff} minutos" ;
+                                                } elseif ($diff < 1440) { // 24 horas
+                                                $hours=floor($diff / 60);
+                                                echo $hours==1 ? 'Hace 1 hora' : "Hace {$hours} horas" ;
+                                                } else {
+                                                echo $usuario->last_login->format('d/m/Y \a \l\a\s H:i');
+                                                }
+                                                @endphp
+                                                @endif
+                                                @else
+                                                <span class="text-muted">No disponible</span>
+                                                @endif
                                     </td>
                                     <td>
                                         <div class="admin-action-buttons">
@@ -373,6 +381,22 @@
                 }
             });
         });
-    })
+
+        // Función para enviar el heartbeat
+        function sendHeartbeat() {
+            fetch('{{ route("user.heartbeat") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                },
+            }).catch(error => console.error('Error en heartbeat:', error));
+        }
+
+        // Enviar heartbeat cada 2 minutos
+        setInterval(sendHeartbeat, 120000);
+        // Enviar el primer heartbeat inmediatamente
+        sendHeartbeat();
+    });
 </script>
 @endpush

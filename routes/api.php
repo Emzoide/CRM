@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\DetalleCotizacion;
 use App\Models\Seguimiento;
 use App\Models\BitacoraEtapasOportunidad;
-
+use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\Chat\MessageController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -304,3 +305,9 @@ Route::post('/oportunidades/{oportunidad}/cotizaciones', function (Oportunidad $
         ], 500);
     }
 });
+
+// Rutas para el webhook de WhatsApp
+Route::get('/webhook/chat', [WebhookController::class, 'verify']);
+Route::post('/webhook/chat', [WebhookController::class, 'receive']);
+
+Route::post('/whatsapp/token', [MessageController::class, 'setToken']);
