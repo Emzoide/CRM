@@ -14,6 +14,8 @@ use App\Models\Seguimiento;
 use App\Models\BitacoraEtapasOportunidad;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Chat\MessageController;
+use App\Http\Controllers\ConsentimientoController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -306,8 +308,23 @@ Route::post('/oportunidades/{oportunidad}/cotizaciones', function (Oportunidad $
     }
 });
 
+Route::get('/whatsapp/templates', [\App\Http\Controllers\Chat\MessageController::class, 'getTemplates']);
+
 // Rutas para el webhook de WhatsApp
 Route::get('/webhook/chat', [WebhookController::class, 'verify']);
 Route::post('/webhook/chat', [WebhookController::class, 'receive']);
 
+Route::post('/webhook/send-template', [\App\Http\Controllers\Chat\WebhookController::class, 'sendTemplateWebhook']);
+
 Route::post('/whatsapp/token', [MessageController::class, 'setToken']);
+
+
+//Ruta para recibir peticiones de consentimiento
+Route::post('/consentimiento', [ConsentimientoController::class, 'store']);
+Route::post('/consentimientos', [ConsentimientoController::class, 'store']);
+Route::get('/consentimientos/dni/{dni}', [ConsentimientoController::class, 'show']);
+
+// Rutas de reportes API
+Route::prefix('reportes')->group(function () {
+    Route::get('/antispam', [App\Http\Controllers\Api\ReporteAntispamController::class, 'index']);
+});

@@ -107,4 +107,93 @@ class WhatsAppService
             ];
         }
     }
+
+    public function sendTemplate(string $to, string $template, string $language, array $parameters = []): array
+    {
+        try {
+            $token = $this->tokenService->getToken();
+            if (!$token) {
+                Log::error('No se pudo obtener un token válido para enviar la plantilla');
+                return [
+                    'success' => false,
+                    'status' => 401,
+                    'error' => 'No se pudo obtener un token válido para enviar la plantilla'
+                ];
+            }
+
+            $payload = [
+                'messaging_product' => 'whatsapp',
+                'to' => $to,
+                'type' => 'template',
+                'template' => [
+                    'name' => $template,
+                    'language' => ['code' => $language],
+                ]
+            ];
+
+            if (!empty($parameters)) {
+                $payload['template']['components'] = [
+                    [
+                        'type' => 'body',
+                        'parameters' => $parameters
+                    ]
+                ];
+            }
+
+            Log::info('Enviando plantilla WhatsApp', [
+                'endpoint' => "{$this->baseUrl}/{$this->phoneNumberId}/messages",
+                'to' => $to,
+                'payload' => $payload
+            ]);
+
+            $response = Http::withToken($token)
+                ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $payload);
+
+            if ($response->status() === 401) {
+                $token = $this->tokenService->renewToken();
+                if (!$token) {
+                    Log::error('No se pudo renovar el token para enviar la plantilla');
+                    return [
+                        'success' => false,
+                        'status' => 401,
+                        'error' => 'No se pudo renovar el token para enviar la plantilla'
+                    ];
+                }
+                $response = Http::withToken($token)
+                    ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $payload);
+            }
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('Plantilla enviada exitosamente', [
+                    'message_id' => $data['messages'][0]['id'] ?? null
+                ]);
+                return [
+                    'success' => true,
+                    'status' => $response->status(),
+                    'message_id' => $data['messages'][0]['id'] ?? null
+                ];
+            }
+
+            $errorJson = $response->json();
+            Log::error('Error al enviar plantilla de WhatsApp', [
+                'status' => $response->status(),
+                'response' => $errorJson
+            ]);
+            return [
+                'success' => false,
+                'status' => $response->status(),
+                'error' => $errorJson['error']['message'] ?? 'Error desconocido al enviar plantilla a WhatsApp'
+            ];
+        } catch (\Exception $e) {
+            Log::error('Excepción al enviar plantilla de WhatsApp', [
+                'message' => $e->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
 }

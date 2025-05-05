@@ -41,10 +41,7 @@ class WhatsAppTokenService
     public function getToken(): ?string
     {
         $token = WhatsAppToken::getActiveToken();
-        if (!$token) {
-            return $this->renewToken();
-        }
-        return $token->token;
+        return $token ? $token->token : null;
     }
 
     public function renewToken(): ?string

@@ -13,6 +13,7 @@ use App\Services\WhatsAppTokenService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use App\Events\NewMessage;
 
 class MessageController extends Controller
 {
@@ -110,6 +111,9 @@ class MessageController extends Controller
                 }
             }
 
+            // Emitir evento de nuevo mensaje
+            broadcast(new NewMessage($message))->toOthers();
+
             return response()->json([
                 'success' => true,
                 'message' => $message
@@ -142,5 +146,29 @@ class MessageController extends Controller
         ]);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Devuelve la lista de plantillas de WhatsApp disponibles (proxy seguro)
+     */
+    public function getTemplates()
+    {
+        $token = \App\Models\Chat\WhatsAppToken::getActiveToken();
+        if (!$token) {
+            return response()->json(['success' => false, 'error' => 'No hay token activo'], 401);
+        }
+        $businessId = config('whatsapp.business_id');
+        $url = "https://graph.facebook.com/v22.0/{$businessId}/message_templates";
+        $response = \Illuminate\Support\Facades\Http::withToken($token->token)
+            ->get($url);
+        if ($response->successful()) {
+            return response()->json(['success' => true, 'data' => $response->json()]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'error' => $response->json()['error']['message'] ?? 'Error al obtener plantillas',
+                'status' => $response->status()
+            ], $response->status());
+        }
     }
 }

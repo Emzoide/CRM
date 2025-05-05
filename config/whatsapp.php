@@ -10,4 +10,5 @@ return [
     'token_expiry_days' => 60,
     'api_version' => 'v19.0',
     'base_url' => 'https://graph.facebook.com',
+    'business_id' => env('WHATSAPP_BUSINESS_ID', '895157532740714'),
 ];

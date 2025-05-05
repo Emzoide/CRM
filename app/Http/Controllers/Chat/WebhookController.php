@@ -199,4 +199,54 @@ class WebhookController extends Controller
         Log::info('Webhook procesado exitosamente');
         return response()->json(['status' => 'received'], 200);
     }
+
+    /**
+     * Webhook para enviar plantillas de WhatsApp desde sistemas externos
+     */
+    public function sendTemplateWebhook(Request $request)
+    {
+        $validated = $request->validate([
+            'to' => 'required|string',
+            'template' => 'required|string',
+            'language' => 'required|string',
+            'parameters' => 'nullable|array',
+        ]);
+
+        $parameters = $validated['parameters'] ?? [];
+
+        // Enviar plantilla usando el servicio
+        $waService = app(\App\Services\WhatsAppService::class);
+        $waResp = $waService->sendTemplate(
+            $validated['to'],
+            $validated['template'],
+            $validated['language'],
+            $parameters
+        );
+
+        // Registrar el mensaje en la base de datos si fue exitoso
+        if ($waResp['success']) {
+            // Buscar o crear contacto y conversación
+            $contact = \App\Models\Chat\Contact::firstOrCreate([
+                'wa_id' => $validated['to']
+            ]);
+            $conversation = \App\Models\Chat\Conversation::firstOrCreate([
+                'contact_id' => $contact->id,
+                'status' => 'open'
+            ]);
+            \App\Models\Chat\Message::create([
+                'message_id' => $waResp['message_id'] ?? uniqid('template_'),
+                'conversation_id' => $conversation->id,
+                'from_me' => true,
+                'message_type' => 'template',
+                'content' => json_encode([
+                    'template' => $validated['template'],
+                    'parameters' => $parameters
+                ]),
+                'timestamp' => now(),
+                'status' => 'sent'
+            ]);
+        }
+
+        return response()->json($waResp, $waResp['success'] ? 200 : 500);
+    }
 }

@@ -114,7 +114,7 @@
                                 </a>
                             </li> -->
                             <li class="sidebar-submenu-item">
-                                <a href="#" class="sidebar-submenu-link">
+                                <a href="/admin/reportes" class="sidebar-submenu-link">
                                     <i class="fas fa-chart-bar sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Reportes</span>
                                 </a>

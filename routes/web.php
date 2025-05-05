@@ -153,8 +153,7 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['status' => 'error'], 401);
     })->name('user.heartbeat');
 
-    Route::get('chat', [PanelController::class,'index']);
-
+    Route::get('chat', [PanelController::class, 'index']);
 });
 
 // Rutas para sucursales y tiendas
@@ -191,6 +190,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
     Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
     Route::delete('/usuarios/{usuario}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+});
+
+// Rutas de reportes
+Route::prefix('admin/reportes')->name('admin.reportes.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\ReporteController::class, 'index'])->name('index');
+    Route::get('/antispam', [App\Http\Controllers\Admin\ReporteController::class, 'antispam'])->name('antispam');
 });
 
 // Ruta de depuración (protegida)
