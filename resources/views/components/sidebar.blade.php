@@ -56,6 +56,14 @@
 
                     <!-- Administrador -->
                     @if(Auth::user()->rol == 'admin')
+                    <li class="sidebar-menu-item" data-tooltip="CHATS">
+                        <a href="/chat" class="sidebar-menu-link">
+                            <div class="sidebar-menu-icon">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <span class="sidebar-menu-text">CHATS</span>
+                        </a>
+                    </li>
                     <li class="sidebar-menu-item has-submenu" data-tooltip="ADMINISTRADOR">
                         <a href="#" class="sidebar-menu-link">
                             <div class="sidebar-menu-icon">

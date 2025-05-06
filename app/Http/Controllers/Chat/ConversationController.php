@@ -14,9 +14,16 @@ class ConversationController extends Controller
      */
     public function index()
     {
-        $conversations = Conversation::with('contact')
+        $conversations = Conversation::with(['contact', 'lastMessage' => function ($query) {
+            $query->orderBy('timestamp', 'desc');
+        }])
             ->orderBy('last_message_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($conversation) {
+                $conversation->last_message = $conversation->lastMessage;
+                unset($conversation->lastMessage);
+                return $conversation;
+            });
 
         return response()->json($conversations);
     }

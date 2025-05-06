@@ -176,7 +176,7 @@
         display: flex;
         flex-direction: column;
         background-color: var(--whatsapp-chat-bg);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23d5d5d5' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23d5d5d5' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
 
     .chat-header {
@@ -447,11 +447,29 @@
 
 @push('scripts')
 <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.js"></script>
 <script>
     const apiBase = '/api';
     let currentConvId = null;
     let currentContact = null;
     let conversations = []; // Variable global para almacenar las conversaciones
+    let lastMessageId = null; // Para detectar nuevos mensajes
+    let pollingMessagesInterval = null;
+    let pollingConversationsInterval = null;
+    let newMessageBanner = null;
+
+    // Función para obtener el último mensaje leído de cada conversación
+    function getLastReadMessages() {
+        const stored = localStorage.getItem('lastReadMessages');
+        return stored ? JSON.parse(stored) : {};
+    }
+
+    // Función para guardar el último mensaje leído de una conversación
+    function setLastReadMessage(convId, messageId) {
+        const lastRead = getLastReadMessages();
+        lastRead[convId] = messageId;
+        localStorage.setItem('lastReadMessages', JSON.stringify(lastRead));
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         fetchConversations();
@@ -516,45 +534,46 @@
                 fetchConversations();
             });
         }
+
+        // Iniciar polling de conversaciones cada 6 segundos
+        pollingConversationsInterval = setInterval(fetchConversations, 6000);
     });
 
     async function fetchConversations() {
         try {
             const res = await fetch(`${apiBase}/conversations`);
-            conversations = await res.json();
+            const newConversations = await res.json();
+
+            // Obtener el último mensaje leído de cada conversación
+            const lastReadMessages = getLastReadMessages();
+
+            conversations = newConversations;
             const ul = document.getElementById('conversations');
             if (ul) {
                 ul.innerHTML = '';
-
                 conversations.forEach(c => {
                     const li = document.createElement('li');
                     li.className = 'conversation-item';
                     if (currentConvId === c.id) {
                         li.classList.add('active');
                     }
-
                     // Crear el avatar con la primera letra del número
                     const avatar = document.createElement('div');
                     avatar.className = 'avatar';
                     avatar.textContent = c.contact.wa_id.charAt(0).toUpperCase();
-
                     // Información de la conversación
                     const info = document.createElement('div');
                     info.className = 'conversation-info';
-
                     // Parte superior: nombre y hora
                     const top = document.createElement('div');
                     top.className = 'conversation-top';
-
                     const name = document.createElement('div');
                     name.className = 'contact-name';
-
                     // Mostrar nombre y número en el formato deseado
                     if (c.contact.name) {
                         const nameSpan = document.createElement('span');
                         nameSpan.textContent = c.contact.name;
                         name.appendChild(nameSpan);
-
                         const phoneSpan = document.createElement('span');
                         phoneSpan.style.fontSize = '12px';
                         phoneSpan.style.color = '#667781';
@@ -563,38 +582,69 @@
                     } else {
                         name.textContent = formatPhoneNumber(c.contact.wa_id);
                     }
-
                     const time = document.createElement('div');
                     time.className = 'conversation-time';
                     // Si hay mensajes, mostrar la hora del último
                     if (c.last_message && c.last_message.timestamp) {
                         time.textContent = formatMessageTime(c.last_message.timestamp);
                     }
-
                     top.appendChild(name);
                     top.appendChild(time);
-
                     // Vista previa del mensaje
                     const preview = document.createElement('div');
                     preview.className = 'conversation-preview';
                     if (c.last_message) {
-                        preview.textContent = c.last_message.content || 'Mensaje multimedia';
-                    }
+                        // Mostrar el último mensaje con su timestamp y estado
+                        const messageContent = c.last_message.content || 'Mensaje multimedia';
+                        const messageTime = new Date(c.last_message.timestamp).toLocaleTimeString('es-PE', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
 
+                        let statusIcon = '';
+                        if (c.last_message.from_me) {
+                            if (c.last_message.status === 'read') {
+                                statusIcon = '<i class="fas fa-check-double" style="color: #53BDEB;"></i>';
+                            } else if (c.last_message.status === 'delivered') {
+                                statusIcon = '<i class="fas fa-check-double" style="color: #A6A6A6;"></i>';
+                            } else if (c.last_message.status === 'sent') {
+                                statusIcon = '<i class="fas fa-check" style="color: #A6A6A6;"></i>';
+                            } else {
+                                statusIcon = '<i class="fas fa-check" style="color: #A6A6A6;"></i>';
+                            }
+                        }
+
+                        preview.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 8px; color: #111B21;">
+                                <span style="color: #667781; font-size: 12px; white-space: nowrap;">${messageTime}</span>
+                                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${messageContent}</span>
+                                ${statusIcon}
+                            </div>
+                        `;
+                    }
                     info.appendChild(top);
                     info.appendChild(preview);
 
-                    // Si hay mensajes no leídos, mostrar contador
-                    if (c.unread_count && c.unread_count > 0) {
-                        const count = document.createElement('div');
-                        count.className = 'message-count';
-                        count.textContent = c.unread_count;
-                        info.appendChild(count);
+                    // Verificar si hay nuevos mensajes comparando con el último mensaje leído
+                    if (c.last_message && c.id !== currentConvId) {
+                        const lastReadId = lastReadMessages[c.id];
+                        if (!lastReadId || c.last_message.id !== lastReadId) {
+                            // Hay nuevos mensajes, mostrar bolita verde
+                            const greenDot = document.createElement('span');
+                            greenDot.style.display = 'inline-block';
+                            greenDot.style.width = '10px';
+                            greenDot.style.height = '10px';
+                            greenDot.style.background = '#25D366';
+                            greenDot.style.borderRadius = '50%';
+                            greenDot.style.marginLeft = '8px';
+                            greenDot.title = 'Nuevo mensaje';
+                            top.appendChild(greenDot);
+                        }
                     }
 
                     li.appendChild(avatar);
                     li.appendChild(info);
-
                     li.dataset.id = c.id;
                     li.dataset.waId = c.contact.wa_id;
                     li.addEventListener('click', () => selectConversation(c.id, c.contact.wa_id, li));
@@ -653,9 +703,80 @@
             });
     }
 
+    async function pedirTokenYGuardar() {
+        // Primero abrir la pestaña para obtener el token
+        const wurl = 'https://developers.facebook.com/apps/612510948474019/whatsapp-business/wa-dev-console/?business_id=481320065770698';
+        window.open(wurl, '_blank');
+
+        // Mostrar un botón para continuar con el proceso de token
+        const continueButton = document.createElement('button');
+        continueButton.textContent = 'Continuar con el proceso de token';
+        continueButton.style.position = 'fixed';
+        continueButton.style.top = '50%';
+        continueButton.style.left = '50%';
+        continueButton.style.transform = 'translate(-50%, -50%)';
+        continueButton.style.zIndex = '9999';
+        continueButton.style.padding = '10px 20px';
+        continueButton.style.backgroundColor = '#25D366';
+        continueButton.style.color = 'white';
+        continueButton.style.border = 'none';
+        continueButton.style.borderRadius = '5px';
+        continueButton.style.cursor = 'pointer';
+
+        document.body.appendChild(continueButton);
+
+        // Esperar a que el usuario haga clic en el botón
+        await new Promise(resolve => {
+            continueButton.onclick = () => {
+                document.body.removeChild(continueButton);
+                resolve();
+            };
+        });
+
+        // Ahora que tenemos interacción del usuario, mostrar el prompt
+        const token = prompt('Token copiado. Pégalo aquí:');
+
+        if (token) {
+            try {
+                const response = await fetch('/api/whatsapp/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        token
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al guardar el token');
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Token guardado correctamente');
+                    // Recargar la página para aplicar los cambios
+                    window.location.reload();
+                } else {
+                    throw new Error(data.error || 'Error al guardar el token');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    }
+
     async function selectConversation(id, waId, element) {
         currentConvId = id;
         currentContact = waId;
+        lastMessageId = null; // Reiniciar para la nueva conversación
+
+        // Marcar como leído al seleccionar la conversación
+        const conversation = conversations.find(c => c.id === id);
+        if (conversation && conversation.last_message) {
+            setLastReadMessage(id, conversation.last_message.id);
+        }
 
         // Actualizar UI
         document.querySelectorAll('.conversation-item').forEach(li => li.classList.remove('active'));
@@ -684,36 +805,59 @@
             }
         }
 
-        loadMessages(id);
-
+        loadMessages(id, true); // true para forzar scroll al final
         // Detener cualquier listener anterior
         if (window.Echo) {
             window.Echo.leave(`chat.${currentConvId}`);
         }
-
         // Iniciar nuevo listener
         listenForMessages(id);
+        // Iniciar polling de mensajes cada 4 segundos
+        if (pollingMessagesInterval) clearInterval(pollingMessagesInterval);
+        pollingMessagesInterval = setInterval(() => {
+            if (currentConvId) {
+                loadMessages(currentConvId, false, true); // no scroll, sí es polling
+                fetchConversations(); // También actualizar la lista de conversaciones
+            }
+        }, 4000);
     }
 
-    async function loadMessages(convId) {
+    async function loadMessages(convId, scrollToEnd = false, isPolling = false) {
         try {
             const res = await fetch(`${apiBase}/conversations/${convId}/messages`);
             const msgs = await res.json();
             const container = document.getElementById('messages');
             if (container) {
-                container.innerHTML = '';
+                // Detectar si hay nuevos mensajes (solo en polling)
+                if (isPolling && msgs.length > 0) {
+                    const lastMsg = msgs[msgs.length - 1];
+                    if (lastMessageId && lastMsg.id !== lastMessageId) {
+                        // Actualizar la lista de conversaciones para mostrar la bolita verde
+                        fetchConversations();
+                    }
+                }
+                // Guardar el último id de mensaje
+                if (msgs.length > 0) {
+                    lastMessageId = msgs[msgs.length - 1].id;
+                }
+
+                // Solo limpiar el contenedor si no es polling
+                if (!isPolling) {
+                    container.innerHTML = '';
+                }
 
                 // Ordenar mensajes por timestamp
                 msgs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
                 // Agrupar mensajes por fecha
                 let currentDate = null;
+                let lastDateDiv = null;
 
                 msgs.forEach(m => {
                     const msgDate = new Date(m.timestamp).toLocaleDateString('es-PE');
 
-                    // Si es un nuevo día, agregar separador de fecha
-                    if (msgDate !== currentDate) {
+                    // Si es un nuevo día y no es polling, agregar separador de fecha
+                    if (msgDate !== currentDate && !isPolling) {
                         currentDate = msgDate;
                         const dateDiv = document.createElement('div');
                         dateDiv.style.textAlign = 'center';
@@ -743,12 +887,74 @@
 
                         dateDiv.appendChild(dateBadge);
                         container.appendChild(dateDiv);
+                        lastDateDiv = dateDiv;
                     }
 
-                    appendMessage(m);
+                    // Crear el mensaje
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = m.from_me ? 'message outgoing' : 'message incoming';
+                    messageDiv.dataset.messageId = m.id;
+
+                    const content = document.createElement('div');
+                    content.className = 'message-content';
+                    content.textContent = m.content;
+
+                    const meta = document.createElement('div');
+                    meta.className = 'message-meta';
+
+                    // Formatear hora
+                    const date = new Date(m.timestamp);
+                    const time = document.createElement('span');
+                    time.className = 'message-time';
+                    time.textContent = date.toLocaleTimeString('es-PE', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    });
+
+                    meta.appendChild(time);
+
+                    // Agregar indicador de estado solo para mensajes enviados
+                    if (m.from_me) {
+                        const status = document.createElement('span');
+                        status.className = 'message-status';
+
+                        // Añadir clase según el estado del mensaje
+                        if (m.status === 'read') {
+                            status.classList.add('read');
+                            status.innerHTML = '<i class="fas fa-check-double" style="color: #53BDEB;"></i>';
+                        } else if (m.status === 'delivered') {
+                            status.classList.add('delivered');
+                            status.innerHTML = '<i class="fas fa-check-double" style="color: #A6A6A6;"></i>';
+                        } else if (m.status === 'sent') {
+                            status.classList.add('sent');
+                            status.innerHTML = '<i class="fas fa-check-double" style="color: #A6A6A6;"></i>';
+                        } else {
+                            status.classList.add('sending');
+                            status.innerHTML = '<i class="fas fa-check-double" style="color: #A6A6A6;"></i>';
+                        }
+
+                        meta.appendChild(status);
+                    }
+
+                    messageDiv.appendChild(content);
+                    messageDiv.appendChild(meta);
+
+                    // Si es polling, verificar si el mensaje ya existe
+                    if (isPolling) {
+                        const existingMessage = container.querySelector(`[data-message-id="${m.id}"]`);
+                        if (!existingMessage) {
+                            container.appendChild(messageDiv);
+                        }
+                    } else {
+                        container.appendChild(messageDiv);
+                    }
                 });
 
-                container.scrollTop = container.scrollHeight;
+                // Scroll al final si es necesario
+                if (scrollToEnd) {
+                    container.scrollTop = container.scrollHeight;
+                }
             }
         } catch (error) {
             console.error('Error al cargar mensajes:', error);
@@ -769,6 +975,7 @@
         if (container) {
             const messageDiv = document.createElement('div');
             messageDiv.className = m.from_me ? 'message outgoing' : 'message incoming';
+            messageDiv.dataset.messageId = m.id;
 
             const content = document.createElement('div');
             content.className = 'message-content';
@@ -811,31 +1018,8 @@
             messageDiv.appendChild(content);
             messageDiv.appendChild(meta);
             container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
         }
-    }
-
-    function pedirTokenYGuardar() {
-        const wurl = 'https://developers.facebook.com/apps/612510948474019/whatsapp-business/wa-dev-console/?business_id=481320065770698';
-
-        // Abrir enlace en nueva ventana
-        window.open(wurl, '_blank');
-
-        // Pedir token
-        const token = prompt('Token copiado. Pégalo aquí:');
-
-        if (token) {
-            return fetch('/api/whatsapp/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    token
-                })
-            });
-        }
-        return Promise.resolve();
     }
 
     // --- PLANTILLAS WHATSAPP ---
