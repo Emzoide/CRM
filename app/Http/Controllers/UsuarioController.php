@@ -75,7 +75,7 @@ class UsuarioController extends Controller
             'last_name' => 'required|string|max:50',
             'email' => 'required|email|max:100|unique:usuarios,email',
             'password' => 'required|string|min:6',
-            'rol' => 'required|in:admin,seller,supervisor',
+            'rol' => 'required|in:admin,seller,supervisor,callcenter',
             'tienda_id' => 'nullable|exists:tiendas,id',
         ]);
 
@@ -129,7 +129,7 @@ class UsuarioController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'email' => 'required|email|max:100|unique:usuarios,email,' . $usuario->id,
-            'rol' => 'required|in:admin,seller,supervisor',
+            'rol' => 'required|in:admin,seller,supervisor,callcenter',
             'tienda_id' => 'nullable|exists:tiendas,id',
             'activo' => 'boolean',
         ]);

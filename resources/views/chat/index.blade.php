@@ -1107,55 +1107,55 @@
 
             // Mostrar vista previa del texto de la plantilla
             const bodyComponent = (selectedTemplate.components || []).find(c => c.type === 'BODY');
+            const buttonComponents = (selectedTemplate.components || []).filter(c => c.type === 'BUTTONS');
+
             if (bodyComponent && bodyComponent.text) {
                 paramsDiv.innerHTML += `<div style='background:#f8f9fa; border-radius:6px; padding:8px 12px; margin-bottom:8px; font-size:13px; color:#333;'><b>Vista previa:</b><br>${bodyComponent.text.replace(/\n/g, '<br>')}</div>`;
             }
 
-            // Detectar parámetros NAMED o POSITIONAL
+            // BODY params
             let paramFields = [];
-            if (selectedTemplate.parameter_format === 'NAMED') {
-                // Buscar en body_text_named_params
-                const namedParams = (bodyComponent && bodyComponent.example && bodyComponent.example.body_text_named_params) ? bodyComponent.example.body_text_named_params : null;
-                if (Array.isArray(namedParams)) {
-                    paramFields = namedParams.map(p => ({
-                        name: p.param_name,
-                        example: p.example || '',
-                    }));
-                } else {
-                    // Fallback: buscar en el texto
-                    const matches = (bodyComponent.text || '').match(/\{\{(.*?)\}\}/g);
-                    if (matches) {
-                        paramFields = matches.map((m, i) => ({
-                            name: m.replace(/\{|\}/g, ''),
-                            example: ''
-                        }));
-                    }
-                }
-            } else if (selectedTemplate.parameter_format === 'POSITIONAL') {
-                // Contar cuántos parámetros hay en el texto
-                const matches = (bodyComponent.text || '').match(/\{\{(.*?)\}\}/g);
-                if (matches) {
-                    paramFields = matches.map((m, i) => ({
-                        name: `param${i+1}`,
-                        example: ''
-                    }));
-                }
+            if (bodyComponent && bodyComponent.example && bodyComponent.example.body_text_named_params) {
+                paramFields = bodyComponent.example.body_text_named_params.map(p => ({
+                    name: p.param_name,
+                    example: p.example || '',
+                    component: 'body'
+                }));
             }
+
+            // BUTTON params
+            buttonComponents.forEach((btnComp, btnIdx) => {
+                (btnComp.buttons || []).forEach((btn, i) => {
+                    if (btn.type === 'URL') {
+                        // Detectar cuántos parámetros {{1}}, {{2}}, etc. hay en la url
+                        const matches = btn.url.match(/\{\{(\d+)\}\}/g);
+                        if (matches) {
+                            matches.forEach((m, paramIdx) => {
+                                const paramNumber = m.match(/\d+/)[0];
+                                paramFields.push({
+                                    name: `button_${btnIdx}_${paramNumber}`,
+                                    example: btn.example ? btn.example[paramIdx] || '' : '',
+                                    component: 'button',
+                                    button_index: btnIdx,
+                                    label: btn.text,
+                                    param_number: paramNumber
+                                });
+                            });
+                        }
+                    }
+                });
+            });
 
             if (paramFields.length > 0) {
                 paramsDiv.innerHTML += '<label>Parámetros requeridos:</label>';
                 paramFields.forEach((p, i) => {
-                    paramsDiv.innerHTML += `<div class='mb-1'><input class='form-control' type='text' placeholder='${p.name}${p.example ? ` (ej: ${p.example})` : ''}' data-param='${p.name}' /></div>`;
+                    const placeholder = p.component === 'button' ?
+                        `[Botón: ${p.label}] Parámetro ${p.param_number}${p.example ? ` (ej: ${p.example})` : ''}` :
+                        `${p.name}${p.example ? ` (ej: ${p.example})` : ''}`;
+
+                    paramsDiv.innerHTML += `<div class='mb-1'><input class='form-control' type='text' placeholder='${placeholder}' data-param='${p.name}' data-component='${p.component}' ${p.component === 'button' ? `data-button-index='${p.button_index}' data-param-number='${p.param_number}'` : ''} /></div>`;
                 });
                 paramsDiv.style.display = '';
-
-                // Agregar evento blur a todos los inputs de parámetros
-                const paramInputs = paramsDiv.querySelectorAll('input[data-param]');
-                paramInputs.forEach(input => {
-                    input.addEventListener('blur', () => {
-                        updatePreview();
-                    });
-                });
             }
             toInput.style.display = '';
             sendBtn.style.display = '';
@@ -1176,11 +1176,19 @@
             }
             // Leer parámetros
             const paramInputs = paramsDiv.querySelectorAll('input[data-param]');
-            const parameters = Array.from(paramInputs).map((inp, i) => ({
-                type: 'text',
-                parameter_name: inp.getAttribute('data-param'),
-                text: inp.value
-            }));
+            const parameters = Array.from(paramInputs).map((inp, i) => {
+                const component = inp.getAttribute('data-component');
+                const buttonIndex = inp.getAttribute('data-button-index');
+                const paramNumber = inp.getAttribute('data-param-number');
+                return {
+                    type: 'text',
+                    parameter_name: inp.getAttribute('data-param'),
+                    text: inp.value,
+                    component,
+                    button_index: buttonIndex,
+                    param_number: paramNumber
+                };
+            });
             // Validar que todos los parámetros estén completos
             if (parameters.some(p => !p.text)) {
                 msgDiv.textContent = 'Completa todos los parámetros.';

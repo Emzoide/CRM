@@ -119,6 +119,8 @@
                   <i class="fas fa-file-invoice"></i>
                   <span>Ver Cotización Activa</span>
                 </button>
+                @if($opp->cotizacion_activa)
+                @endif
                 @else
                 <button
                   type="button"

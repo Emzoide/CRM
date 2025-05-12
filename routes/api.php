@@ -15,6 +15,7 @@ use App\Models\BitacoraEtapasOportunidad;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\ConsentimientoController;
+use App\Http\Controllers\WhatsAppController;
 
 /*
 |--------------------------------------------------------------------------
@@ -328,3 +329,9 @@ Route::get('/consentimientos/dni/{dni}', [ConsentimientoController::class, 'show
 Route::prefix('reportes')->group(function () {
     Route::get('/antispam', [App\Http\Controllers\Api\ReporteAntispamController::class, 'index']);
 });
+
+// Rutas para WhatsApp Webhook
+Route::post('/whatsapp/webhook/template', [App\Http\Controllers\Api\WhatsAppWebhookController::class, 'sendTemplate']);
+
+Route::post('/whatsapp/send-contact', [WhatsAppController::class, 'sendContactTemplate']);
+Route::post('/whatsapp/send-reactivation', [WhatsAppController::class, 'sendReactivationTemplate']);

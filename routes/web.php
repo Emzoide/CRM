@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\SucursalController as AdminSucursalController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Chat\PanelController;
+use App\Http\Controllers\CotizacionPdfController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -65,7 +66,46 @@ Route::post('/logout', function (Request $request) {
 Route::middleware(['auth'])->group(function () {
     // Dashboard route
     Route::get('/', function () {
-        return view('dashboard');
+        $totalClientes = \App\Models\Cliente::count();
+        $clientesMesActual = \App\Models\Cliente::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+        $clientesMesPasado = \App\Models\Cliente::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+        $cambio = $clientesMesPasado > 0 ? (($clientesMesActual - $clientesMesPasado) / $clientesMesPasado) * 100 : 0;
+        $cambioTexto = number_format(abs($cambio), 1) . '%';
+        $cambioTipo = $cambio >= 0 ? 'up' : 'down';
+
+        // Obtener los 3 clientes más recientes
+        $clientesRecientes = \App\Models\Cliente::latest()
+            ->take(3)
+            ->get()
+            ->map(function ($cliente) {
+                return [
+                    'name' => $cliente->nombre,
+                    'email' => $cliente->email,
+                    'timeAgo' => $cliente->created_at->diffForHumans()
+                ];
+            });
+
+        // Obtener las 3 cotizaciones más recientes
+        $cotizacionesRecientes = \App\Models\Cotizacion::with(['oportunidad.cliente', 'vendedor'])
+            ->latest('emitida_en')
+            ->take(3)
+            ->get()
+            ->map(function ($cotizacion) {
+                return [
+                    'code' => $cotizacion->codigo,
+                    'clientName' => $cotizacion->oportunidad->cliente->nombre,
+                    'clientEmail' => $cotizacion->oportunidad->cliente->email,
+                    'date' => $cotizacion->emitida_en->format('d/m/Y'),
+                    'total' => number_format($cotizacion->total, 2),
+                    'status' => $cotizacion->estado
+                ];
+            });
+
+        return view('dashboard', compact('totalClientes', 'cambioTexto', 'cambioTipo', 'clientesRecientes', 'cotizacionesRecientes'));
     })->name('home');
 
     Route::get('/seguimiento', function () {
@@ -190,13 +230,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
     Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
     Route::delete('/usuarios/{usuario}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
+
+    // Rutas de reportes
+    Route::get('/reportes', [App\Http\Controllers\Admin\ReporteController::class, 'index'])->name('reportes.index');
+    Route::get('reportes/antispam', [App\Http\Controllers\Admin\ReporteController::class, 'antispam'])->name('reportes.antispam');
 });
 
-// Rutas de reportes
-Route::prefix('admin/reportes')->name('admin.reportes.')->group(function () {
-    Route::get('/', [App\Http\Controllers\Admin\ReporteController::class, 'index'])->name('index');
-    Route::get('/antispam', [App\Http\Controllers\Admin\ReporteController::class, 'antispam'])->name('antispam');
-});
+Route::get('/cotizaciones/{id}/pdf', [CotizacionPdfController::class, 'download'])->name('cotizaciones.pdf');
 
 // Ruta de depuración (protegida)
 Route::middleware(['auth'])->get('/debug/routes', function () {

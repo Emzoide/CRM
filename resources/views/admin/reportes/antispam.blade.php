@@ -29,7 +29,12 @@
                         </div>
                         <div class="col-md-3">
                             <label>&nbsp;</label>
-                            <button class="btn btn-primary btn-block" onclick="filtrar()">Filtrar</button>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary flex-grow-1" onclick="filtrar()">Filtrar</button>
+                                <button class="btn btn-success" onclick="descargarCSV()">
+                                    <i class="fas fa-file-excel"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -201,6 +206,84 @@
         titulo.textContent = tipo;
         imagen.src = url;
         modal.show();
+    }
+
+    function descargarCSV() {
+        const tabla = document.getElementById('tablaConsentimientos');
+        const filas = tabla.querySelectorAll('tbody tr');
+
+        // Crear el encabezado del CSV
+        let csv = [
+            [
+                'Nombre',
+                'Apellido',
+                'DNI',
+                'Email',
+                'Teléfono',
+                'Acepta Políticas',
+                'Acepta Comunicaciones',
+                'IP',
+                'User Agent',
+                'Fuente Origen',
+                'Fecha Aceptación'
+            ]
+        ];
+
+        // Agregar cada fila al CSV
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length > 0) {
+                const nombre = celdas[0].textContent.trim();
+                const apellido = celdas[1].textContent.trim();
+                const dni = celdas[2].textContent.trim();
+                const email = celdas[3].textContent.trim();
+                const telefono = celdas[4].textContent.trim();
+                const aceptaPoliticas = celdas[5].querySelector('.badge').textContent.trim();
+                const aceptaComunicaciones = celdas[6].querySelector('.badge').textContent.trim();
+                const ip = celdas[7].textContent.trim();
+                const userAgent = celdas[8].textContent.trim();
+                const fuenteOrigen = celdas[9].textContent.trim();
+                const fechaAceptacion = celdas[10].textContent.trim();
+
+                // Agregar la fila al CSV
+                csv.push([
+                    nombre,
+                    apellido,
+                    dni,
+                    email,
+                    telefono,
+                    aceptaPoliticas,
+                    aceptaComunicaciones,
+                    ip,
+                    userAgent,
+                    fuenteOrigen,
+                    fechaAceptacion
+                ]);
+            }
+        });
+
+        // Convertir el array a string CSV
+        const csvString = csv.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+        // Crear el blob y descargar
+        const blob = new Blob([csvString], {
+            type: 'text/csv;charset=utf-8;'
+        });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        // Obtener fechas para el nombre del archivo
+        const fechaInicio = document.getElementById('fecha_inicio').value;
+        const fechaFin = document.getElementById('fecha_fin').value;
+        const nombreArchivo = `consentimientos_${fechaInicio || 'inicio'}_${fechaFin || 'fin'}.csv`;
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', nombreArchivo);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     // Cargar datos iniciales

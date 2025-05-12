@@ -108,7 +108,7 @@ class WhatsAppService
         }
     }
 
-    public function sendTemplate(string $to, string $template, string $language, array $parameters = []): array
+    public function sendTemplate(string $to, string $template, string $language, array $payload = []): array
     {
         try {
             $token = $this->tokenService->getToken();
@@ -117,52 +117,84 @@ class WhatsAppService
                 return [
                     'success' => false,
                     'status' => 401,
-                    'error' => 'No se pudo obtener un token válido para enviar la plantilla'
+                    'error' => 'Token inválido'
                 ];
             }
 
-            $payload = [
+            /* --- Construir componentes --- */
+            $components = [];
+
+            // BODY ──────────────────────────────────────────────
+            $bodyParams = array_filter($payload, fn($p) => ($p['component'] ?? '') === 'body');
+            if ($bodyParams) {
+                $parameters = [];
+                foreach ($bodyParams as $p) {
+                    $param = [
+                        'type' => 'text',
+                        'text' => $p['text']
+                    ];
+                    // Requisito cuando parameter_format = NAMED
+                    if (!empty($p['parameter_name'])) {
+                        $param['parameter_name'] = $p['parameter_name'];
+                    }
+                    $parameters[] = $param;
+                }
+
+                $components[] = [
+                    'type'       => 'body',   // *** minúsculas ***
+                    'parameters' => $parameters
+                ];
+            }
+
+            // BUTTONS ───────────────────────────────────────────
+            $buttonParams = array_filter($payload, fn($p) => ($p['component'] ?? '') === 'button');
+            foreach ($buttonParams as $p) {
+                $components[] = [
+                    'type'      => 'button',  // *** minúsculas ***
+                    'sub_type'  => 'url',
+                    'index'     => (int)($p['button_index'] ?? 0),
+                    'parameters' => [[
+                        'type' => 'text',
+                        'text' => $p['text']
+                    ]]
+                ];
+            }
+
+            /* --- Payload final --- */
+            $finalPayload = [
                 'messaging_product' => 'whatsapp',
-                'to' => $to,
-                'type' => 'template',
-                'template' => [
-                    'name' => $template,
-                    'language' => ['code' => $language],
+                'to'                => $to,
+                'type'              => 'template',
+                'template'          => [
+                    'name'     => $template,
+                    'language' => [
+                        'code'   => $language,
+                        'policy' => 'deterministic'
+                    ],
+                    'components' => $components
                 ]
             ];
 
-            if (!empty($parameters)) {
-                $payload['template']['components'] = [
-                    [
-                        'type' => 'body',
-                        'parameters' => $parameters
-                    ]
-                ];
-            }
-
-            Log::info('Enviando plantilla WhatsApp', [
-                'endpoint' => "{$this->baseUrl}/{$this->phoneNumberId}/messages",
-                'to' => $to,
-                'payload' => $payload
-            ]);
-
+            /* --- Envío --- */
             $response = Http::withToken($token)
-                ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $payload);
+                ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $finalPayload);
 
+            /* --- Reintento si expira el token --- */
             if ($response->status() === 401) {
-                $token = $this->tokenService->renewToken();
-                if (!$token) {
+                if ($token = $this->tokenService->renewToken()) {
+                    $response = Http::withToken($token)
+                        ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $finalPayload);
+                } else {
                     Log::error('No se pudo renovar el token para enviar la plantilla');
                     return [
                         'success' => false,
                         'status' => 401,
-                        'error' => 'No se pudo renovar el token para enviar la plantilla'
+                        'error' => 'No se pudo renovar el token'
                     ];
                 }
-                $response = Http::withToken($token)
-                    ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $payload);
             }
 
+            /* --- Respuesta OK --- */
             if ($response->successful()) {
                 $data = $response->json();
                 Log::info('Plantilla enviada exitosamente', [
@@ -175,17 +207,19 @@ class WhatsAppService
                 ];
             }
 
-            $errorJson = $response->json();
+            /* --- Error de la API --- */
+            $error = $response->json();
             Log::error('Error al enviar plantilla de WhatsApp', [
-                'status' => $response->status(),
-                'response' => $errorJson
+                'status'    => $response->status(),
+                'response'  => $error
             ]);
             return [
                 'success' => false,
                 'status' => $response->status(),
-                'error' => $errorJson['error']['message'] ?? 'Error desconocido al enviar plantilla a WhatsApp'
+                'error' => $error['error']['message'] ??
+                    'Error desconocido al enviar plantilla'
             ];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Excepción al enviar plantilla de WhatsApp', [
                 'message' => $e->getMessage()
             ]);

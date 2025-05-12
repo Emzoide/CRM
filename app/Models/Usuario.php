@@ -77,4 +77,12 @@ class Usuario extends Authenticatable
     {
         return $this->password_hash;
     }
+
+    /**
+     * Verifica si el usuario tiene un rol específico
+     */
+    public function hasRole($role): bool
+    {
+        return $this->rol === $role;
+    }
 }

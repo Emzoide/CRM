@@ -45,6 +45,7 @@
                     </li> -->
 
                     <!-- Clientes -->
+                    @if(Auth::user()->rol == 'admin' || Auth::user()->rol == 'asesor')
                     <li class="sidebar-menu-item" data-tooltip="CLIENTES">
                         <a href="/clients" class="sidebar-menu-link">
                             <div class="sidebar-menu-icon">
@@ -53,9 +54,10 @@
                             <span class="sidebar-menu-text">CLIENTES</span>
                         </a>
                     </li>
+                    @endif
 
                     <!-- Administrador -->
-                    @if(Auth::user()->rol == 'admin')
+                    @if(Auth::user()->rol == 'admin' || Auth::user()->rol == 'callcenter')
                     <li class="sidebar-menu-item" data-tooltip="CHATS">
                         <a href="/chat" class="sidebar-menu-link">
                             <div class="sidebar-menu-icon">
@@ -64,6 +66,7 @@
                             <span class="sidebar-menu-text">CHATS</span>
                         </a>
                     </li>
+                    @if(Auth::user()->rol == 'admin')
                     <li class="sidebar-menu-item has-submenu" data-tooltip="ADMINISTRADOR">
                         <a href="#" class="sidebar-menu-link">
                             <div class="sidebar-menu-icon">
@@ -121,12 +124,14 @@
                                     <span class="sidebar-submenu-text">Inventario</span>
                                 </a>
                             </li> -->
+                            @if(Auth::user()->rol == 'admin')
                             <li class="sidebar-submenu-item">
                                 <a href="/admin/reportes" class="sidebar-submenu-link">
                                     <i class="fas fa-chart-bar sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Reportes</span>
                                 </a>
                             </li>
+                            @endif
                             <li class="sidebar-submenu-item">
                                 <a href="#" class="sidebar-submenu-link">
                                     <i class="fas fa-cog sidebar-submenu-icon"></i>
@@ -135,6 +140,7 @@
                             </li>
                         </ul>
                     </li>
+                    @endif
                     <!-- Ventas
                     <li class="sidebar-menu-item" data-tooltip="VENTAS">
                         <a href="#" class="sidebar-menu-link">
@@ -159,7 +165,8 @@
         'admin' => 'Administrador',
         'seller' => 'Asesor',
         'user' => 'Usuario',
-        'supervisor'=> 'Supervisor'
+        'supervisor'=> 'Supervisor',
+        'callcenter' => 'Call Center'
         ];
         @endphp
         <!-- Perfil de Usuario -->

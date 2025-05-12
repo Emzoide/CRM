@@ -221,6 +221,7 @@
                             <option value="admin">Administrador</option>
                             <option value="seller">Vendedor</option>
                             <option value="supervisor">Supervisor</option>
+                            <option value="callcenter">Call Center</option>
                         </select>
                         @error('rol')
                         <div class="admin-error-message">{{ $message }}</div>
@@ -293,6 +294,7 @@
                             <option value="admin" {{ $usuario->rol == 'admin' ? 'selected' : '' }}>Administrador</option>
                             <option value="seller" {{ $usuario->rol == 'seller' ? 'selected' : '' }}>Vendedor</option>
                             <option value="supervisor" {{ $usuario->rol == 'supervisor' ? 'selected' : '' }}>Supervisor</option>
+                            <option value="callcenter" {{ $usuario->rol == 'callcenter' ? 'selected' : '' }}>Call Center</option>
                         </select>
                         @error('rol')
                         <div class="admin-error-message">{{ $message }}</div>

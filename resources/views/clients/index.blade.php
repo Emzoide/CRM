@@ -157,14 +157,24 @@
     {{-- Cabecera --}}
     <div class="flex justify-between items-center mb-6">
         <h1>Clientes</h1>
-        <button
-            onclick="openCreateModal()"
-            class="btn btn-primary btn-nuevo-cliente">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon-nuevo-cliente" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Nuevo Cliente
-        </button>
+        @if (Auth::user()->hasRole('admin'))
+        <div class="flex gap-4">
+            <button
+                onclick="descargarClientesCSV()"
+                class="btn btn-success">
+                <i class="fas fa-file-excel mr-2"></i>
+                Descargar CSV
+            </button>
+            @endif
+            <button
+                onclick="openCreateModal()"
+                class="btn btn-primary btn-nuevo-cliente">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon-nuevo-cliente" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Nuevo Cliente
+            </button>
+        </div>
     </div>
 
     {{-- Tabla de Clientes --}}
@@ -177,6 +187,9 @@
                     <th>Canal</th>
                     <th>Email</th>
                     <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Ocupación</th>
+                    <th>Fecha Nac.</th>
                     <th class="text-right">Acciones</th>
                 </tr>
             </thead>
@@ -202,6 +215,9 @@
                         @endif
                     </td>
                     <td>{{ $cliente->phone ?? '—' }}</td>
+                    <td>{{ $cliente->address ?? '—' }}</td>
+                    <td>{{ $cliente->occupation ?? '—' }}</td>
+                    <td>{{ $cliente->fec_nac ? date('d/m/Y', strtotime($cliente->fec_nac)) : '—' }}</td>
                     <td class="text-right">
                         <button
                             onclick="openEditModal({{ $cliente->id }})"
@@ -217,7 +233,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-8">
+                    <td colspan="9" class="text-center py-8">
                         <p class="text-gray-500">No hay clientes registrados.</p>
                         <button onclick="openCreateModal()" class="btn btn-primary mt-4">
                             Agregar Cliente
@@ -404,5 +420,61 @@
             closeEditModal();
         }
     });
+
+    function descargarClientesCSV() {
+        // Obtener la tabla de clientes
+        const tabla = document.querySelector('table');
+        const filas = tabla.querySelectorAll('tbody tr');
+
+        // Crear el encabezado del CSV
+        let csv = [
+            ['DNI/RUC', 'Nombre', 'Canal', 'Email', 'Teléfono', 'Dirección', 'Ocupación', 'Fecha de Nacimiento']
+        ];
+
+        // Agregar cada fila al CSV
+        filas.forEach(fila => {
+            const celdas = fila.querySelectorAll('td');
+            if (celdas.length > 0) {
+                const dni = celdas[0].textContent.trim();
+                const nombre = celdas[1].textContent.trim();
+                const canal = celdas[2].querySelector('.badge') ? celdas[2].querySelector('.badge').textContent.trim() : '';
+                const email = celdas[3].querySelector('a') ? celdas[3].querySelector('a').textContent.trim() : '';
+                const telefono = celdas[4].textContent.trim();
+                const direccion = celdas[5].textContent.trim();
+                const ocupacion = celdas[6].textContent.trim();
+                const fechaNac = celdas[7].textContent.trim();
+
+                // Agregar la fila al CSV
+                csv.push([
+                    dni,
+                    nombre,
+                    canal,
+                    email,
+                    telefono,
+                    direccion,
+                    ocupacion,
+                    fechaNac
+                ]);
+            }
+        });
+
+        // Convertir el array a string CSV
+        const csvString = csv.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+        // Crear el blob y descargar
+        const blob = new Blob([csvString], {
+            type: 'text/csv;charset=utf-8;'
+        });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `clientes_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>
 @endsection
