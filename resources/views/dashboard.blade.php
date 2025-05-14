@@ -36,7 +36,6 @@
                         value="Próximamente"
                         class="dashboard-card disabled" />
                 </div>
-
                 <!-- Charts and Tables -->
                 <div class="dashboard-row">
                     <div class="dashboard-col">

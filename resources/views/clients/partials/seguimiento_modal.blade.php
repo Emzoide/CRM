@@ -77,6 +77,35 @@ if ($activa && in_array($activa->etapa_actual, ['won','lost'])) $sinOportActiva 
                     <label for="precio_unit">Precio Unitario</label>
                     <input type="number" name="precio_unit" class="form-control" step="0.01" data-required="true">
                 </div>
+                
+                <h4 class="text-md font-medium mb-2 mt-4">Información de Contacto</h4>
+                <input type="hidden" name="update_client_info" id="update_client_info" value="1">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" class="form-control" value="{{ $cliente->email }}" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono</label>
+                    <input type="text" name="phone" id="phone" class="form-control" value="{{ $cliente->phone }}" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label for="address">Dirección</label>
+                    <input type="text" name="address" id="address" class="form-control" value="{{ $cliente->address }}" maxlength="150">
+                </div>
+                <div class="form-group">
+                    <label for="occupation">Ocupación</label>
+                    <input type="text" name="occupation" id="occupation" class="form-control" value="{{ $cliente->occupation }}" maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label for="canal_id">Canal de Contacto</label>
+                    <select name="canal_id" class="form-control" id="canalSelect">
+                        <option value="">Seleccione un canal</option>
+                        @foreach(\App\Models\CanalContacto::orderBy('nombre')->get() as $canal)
+                            <option value="{{ $canal->id }}" {{ $cliente->canal_id == $canal->id ? 'selected' : '' }}>{{ $canal->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
                 <div class="form-group">
                     <label for="tipo_compra">Tipo de Compra</label>

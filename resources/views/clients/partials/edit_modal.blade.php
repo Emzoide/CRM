@@ -8,6 +8,15 @@
 </div>
 
 <div class="modal-body">
+    <div class="alert alert-info mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div class="flex items-center">
+            <div class="mr-2"><i class="fas fa-info-circle text-blue-500"></i></div>
+            <div>
+                <strong>¡Información!</strong> Por favor, actualice los datos del cliente según sea necesario. Estos datos podrán ser utilizados más adelante en las cotizaciones.
+            </div>
+        </div>
+    </div>
+
     <form id="editForm" action="{{ route('clients.update', $cliente) }}" method="POST">
         @csrf
         @method('PUT')
@@ -44,21 +53,6 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label class="form-label">Canal de Contacto</label>
-            <select name="canal_id" class="form-control">
-                <option value="">-- ninguno --</option>
-                @foreach($canales as $canal)
-                <option
-                    value="{{ $canal->id }}"
-                    @if(old('canal_id', $cliente->canal_id)==$canal->id) selected @endif
-                    >
-                    {{ $canal->nombre }}
-                </option>
-                @endforeach
-            </select>
-        </div>
-
         <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
                 <label class="form-label">Email</label>
@@ -66,7 +60,8 @@
                     name="email"
                     type="email"
                     value="{{ old('email', $cliente->email) }}"
-                    maxlength="100"
+                    maxlength="255"
+                    placeholder="correo@ejemplo.com"
                     class="form-control">
             </div>
             <div class="form-group">
@@ -74,27 +69,10 @@
                 <input
                     name="phone"
                     value="{{ old('phone', $cliente->phone) }}"
-                    maxlength="50"
+                    maxlength="100"
+                    placeholder="Número de contacto"
                     class="form-control">
             </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Dirección</label>
-            <input
-                name="address"
-                value="{{ old('address', $cliente->address) }}"
-                maxlength="150"
-                class="form-control">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Ocupación</label>
-            <input
-                name="occupation"
-                value="{{ old('occupation', $cliente->occupation) }}"
-                maxlength="100"
-                class="form-control">
         </div>
     </form>
 </div>

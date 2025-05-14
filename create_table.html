@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Create Table</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .sql-container {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="sql-container">
+CREATE TABLE `usuario_permiso` (
+  `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `usuario_id` smallint(5) UNSIGNED NOT NULL,
+  `permiso_id` smallint(5) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `usuario_permiso_usuario_id_index` (`usuario_id`),
+  KEY `usuario_permiso_permiso_id_index` (`permiso_id`),
+  CONSTRAINT `usuario_permiso_usuario_id_foreign` 
+  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `usuario_permiso_permiso_id_foreign` 
+  FOREIGN KEY (`permiso_id`) REFERENCES `permisos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    </div>
+</body>
+</html> 

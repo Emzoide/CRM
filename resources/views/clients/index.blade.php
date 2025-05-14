@@ -157,6 +157,7 @@
     {{-- Cabecera --}}
     <div class="flex justify-between items-center mb-6">
         <h1>Clientes</h1>
+        @auth
         @if (Auth::user()->hasRole('admin'))
         <div class="flex gap-4">
             <button
@@ -165,7 +166,8 @@
                 <i class="fas fa-file-excel mr-2"></i>
                 Descargar CSV
             </button>
-            @endif
+        @endif
+        @endauth
             <button
                 onclick="openCreateModal()"
                 class="btn btn-primary btn-nuevo-cliente">
@@ -199,9 +201,16 @@
                     <td>{{ $cliente->dni_ruc }}</td>
                     <td class="font-medium">{{ $cliente->nombre }}</td>
                     <td>
-                        @if($cliente->canal)
+                        @php
+                            $canalNombre = null;
+                            $ultimaOportunidad = $cliente->oportunidades()->orderBy('created_at', 'desc')->first();
+                            if ($ultimaOportunidad && $ultimaOportunidad->canalFuente) {
+                                $canalNombre = $ultimaOportunidad->canalFuente->nombre;
+                            }
+                        @endphp
+                        @if($canalNombre)
                         <span class="badge badge-primary">
-                            {{ $cliente->canal->nombre }}
+                            {{ $canalNombre }}
                         </span>
                         @else
                         <span class="text-gray-400">—</span>
@@ -214,9 +223,9 @@
                         <span class="text-gray-400">—</span>
                         @endif
                     </td>
-                    <td>{{ $cliente->phone ?? '—' }}</td>
-                    <td>{{ $cliente->address ?? '—' }}</td>
-                    <td>{{ $cliente->occupation ?? '—' }}</td>
+                    <td>{{ $cliente->phone ?: '—' }}</td>
+                    <td>{{ $cliente->ultimaCotizacionActiva ? $cliente->ultimaCotizacionActiva->address : '—' }}</td>
+                    <td>{{ $cliente->ultimaCotizacionActiva ? $cliente->ultimaCotizacionActiva->occupation : '—' }}</td>
                     <td>{{ $cliente->fec_nac ? date('d/m/Y', strtotime($cliente->fec_nac)) : '—' }}</td>
                     <td class="text-right">
                         <button
@@ -261,6 +270,15 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="alert alert-info mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <div class="flex items-center">
+                        <div class="mr-2"><i class="fas fa-info-circle text-blue-500"></i></div>
+                        <div>
+                            <strong>¡Información!</strong> Por favor, ingrese los datos del cliente. Estos datos podrán ser utilizados más adelante en las cotizaciones.
+                        </div>
+                    </div>
+                </div>
+
                 <form id="createForm" action="{{ route('clients.store') }}" method="POST">
                     @csrf
                     <div class="grid grid-cols-2 gap-4">
@@ -297,23 +315,13 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Canal de Contacto</label>
-                        <select name="canal_id" class="form-control">
-                            <option value="">-- ninguno --</option>
-                            @foreach($canales as $canal)
-                            <option value="{{ $canal->id }}">{{ $canal->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div class="form-group">
                             <label class="form-label">Email</label>
                             <input
                                 name="email"
                                 type="email"
-                                maxlength="100"
+                                maxlength="255"
                                 placeholder="correo@ejemplo.com"
                                 class="form-control">
                         </div>
@@ -321,28 +329,10 @@
                             <label class="form-label">Teléfono</label>
                             <input
                                 name="phone"
-                                maxlength="50"
-                                placeholder="+51 999 999 999"
+                                maxlength="100"
+                                placeholder="Número de contacto"
                                 class="form-control">
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Dirección</label>
-                        <input
-                            name="address"
-                            maxlength="150"
-                            placeholder="Dirección completa"
-                            class="form-control">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Ocupación</label>
-                        <input
-                            name="occupation"
-                            maxlength="100"
-                            placeholder="Ocupación o profesión"
-                            class="form-control">
                     </div>
                 </form>
             </div>

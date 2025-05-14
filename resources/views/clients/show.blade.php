@@ -94,7 +94,7 @@
               <span class="oportunidad-badge {{ $opp->etapa_actual }}">
                 {{ traducirEstado($opp->etapa_actual) }}
               </span>
-              @if($opp->id == ($oportunidadActiva ? $oportunidadActiva->id : null))
+              @if($oportunidadActiva && $opp->id == $oportunidadActiva->id)
               <div class="flex space-x-2">
                 <button
                   type="button"
@@ -112,6 +112,9 @@
                   <i class="fas fa-comment-dots"></i>
                   <span>Nuevo Seguimiento</span>
                 </button>
+                @endif
+                
+                @if($opp->cotizacion_activa)
                 <button
                   type="button"
                   onclick="openCotizacionActivaModal({{ $opp->id }})"
@@ -119,8 +122,6 @@
                   <i class="fas fa-file-invoice"></i>
                   <span>Ver Cotización Activa</span>
                 </button>
-                @if($opp->cotizacion_activa)
-                @endif
                 @else
                 <button
                   type="button"

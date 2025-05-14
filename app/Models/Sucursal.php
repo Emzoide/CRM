@@ -21,6 +21,14 @@ class Sucursal extends Model
     {
         return $this->hasMany(Tienda::class);
     }
+    
+    /**
+     * Obtiene la primera tienda asociada a esta sucursal (alias para compatibilidad)
+     */
+    public function tienda()
+    {
+        return $this->hasOne(Tienda::class);
+    }
 
     /**
      * Obtiene los usuarios asociados a esta sucursal

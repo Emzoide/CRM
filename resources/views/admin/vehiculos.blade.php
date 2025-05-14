@@ -69,7 +69,7 @@
                                                         data-bs-target="#editarMarcaModal{{ $marca->id }}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <form action="{{ route('admin.vehiculos.marca.destroy', $marca) }}" method="POST" class="admin-inline-form">
+                                                    <form action="{{ route('admin.vehiculos.marcas.destroy', $marca) }}" method="POST" class="admin-inline-form">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta marca?')">
@@ -119,7 +119,7 @@
                                                         data-bs-target="#editarModeloModal{{ $modelo->id }}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <form action="{{ route('admin.vehiculos.modelo.destroy', $modelo) }}" method="POST" class="admin-inline-form">
+                                                    <form action="{{ route('admin.vehiculos.modelos.destroy', $modelo) }}" method="POST" class="admin-inline-form">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar este modelo?')">
@@ -173,7 +173,7 @@
                                                         data-bs-target="#editarVersionModal{{ $version->id }}">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <form action="{{ route('admin.vehiculos.version.destroy', $version) }}" method="POST" class="admin-inline-form">
+                                                    <form action="{{ route('admin.vehiculos.versiones.destroy', $version) }}" method="POST" class="admin-inline-form">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm" onclick="return confirm('¿Estás seguro de que deseas eliminar esta versión?')">
@@ -203,7 +203,7 @@
                 <h5 class="modal-title">Nueva Marca</h5>
                 <button type="button" class="btn-close admin-modal-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.vehiculos.marca.store') }}" method="POST">
+            <form action="{{ route('admin.vehiculos.marcas.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="admin-form-group">
@@ -231,7 +231,7 @@
                 <h5 class="modal-title">Nuevo Modelo</h5>
                 <button type="button" class="btn-close admin-modal-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.vehiculos.modelo.store') }}" method="POST">
+            <form action="{{ route('admin.vehiculos.modelos.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="admin-form-group">
@@ -271,7 +271,7 @@
                 <h5 class="modal-title">Nueva Versión</h5>
                 <button type="button" class="btn-close admin-modal-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.vehiculos.version.store') }}" method="POST">
+            <form action="{{ route('admin.vehiculos.versiones.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="admin-form-group">
@@ -319,7 +319,7 @@
                 <h5 class="modal-title">Editar Marca</h5>
                 <button type="button" class="btn-close admin-modal-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.vehiculos.marca.update', $marca) }}" method="POST">
+            <form action="{{ route('admin.vehiculos.marcas.update', $marca) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -350,7 +350,7 @@
                 <h5 class="modal-title">Editar Modelo</h5>
                 <button type="button" class="btn-close admin-modal-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.vehiculos.modelo.update', $modelo) }}" method="POST">
+            <form action="{{ route('admin.vehiculos.modelos.update', $modelo) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -394,7 +394,7 @@
                 <h5 class="modal-title">Editar Versión</h5>
                 <button type="button" class="btn-close admin-modal-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.vehiculos.version.update', $version) }}" method="POST">
+            <form action="{{ route('admin.vehiculos.versiones.update', $version) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">

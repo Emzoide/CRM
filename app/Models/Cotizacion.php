@@ -40,7 +40,11 @@ class Cotizacion extends Model
         'razon_no_plazos',
         'seguro_vehicular',
         'razon_no_seguro',
-        'observacion_call_center'
+        'observacion_call_center',
+        'email',
+        'phone',
+        'address',
+        'occupation'
     ];
     protected $dates = [
         'emitida_en',

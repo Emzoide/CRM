@@ -64,6 +64,13 @@ class SeguimientoController extends Controller
                     'razon_no_seguro'     => 'nullable|required_if:seguro_vehicular,0|string|max:200',
                     'razon_no_plazos'     => 'nullable|string|max:200',
                     'observacion_call_center' => 'nullable|string|max:500',
+                    // Campos de contacto
+                    'email'               => 'nullable|email|max:100',
+                    'phone'               => 'nullable|string|max:50',
+                    'address'             => 'nullable|string|max:150',
+                    'occupation'          => 'nullable|string|max:100',
+                    'canal_id'            => 'nullable|exists:canales_contacto,id',
+                    'update_client_info'  => 'sometimes|boolean',
                 ];
             }
 
@@ -97,6 +104,7 @@ class SeguimientoController extends Controller
                         'cliente_id'   => $data['cliente_id'],
                         'etapa_actual' => 'new',
                         'probabilidad' => 0,
+                        'canal_fuente_id' => $data['canal_id'] ?? null,
                     ]);
 
                     Log::info('Nueva oportunidad creada', [
@@ -131,6 +139,11 @@ class SeguimientoController extends Controller
                         'seguro_vehicular' => $data['seguro_vehicular'],
                         'razon_no_seguro' => $data['razon_no_seguro'] ?? null,
                         'observacion_call_center' => $data['observacion_call_center'] ?? null,
+                        // Datos de contacto para la cotización
+                        'email'          => $data['email'] ?? null,
+                        'phone'          => $data['phone'] ?? null,
+                        'address'        => $data['address'] ?? null,
+                        'occupation'     => $data['occupation'] ?? null,
                     ]);
 
                     Log::info('Nueva cotización creada', [
@@ -151,6 +164,24 @@ class SeguimientoController extends Controller
                         'version_vehiculo_id' => $data['version_vehiculo_id'],
                         'precio_unit' => $data['precio_unit']
                     ]);
+                    
+                    // Actualizar información del cliente si se solicitó
+                    if (!empty($data['email']) || !empty($data['phone']) || !empty($data['address']) || !empty($data['occupation'])) {
+                        $cliente = \App\Models\Cliente::find($data['cliente_id']);
+                        if ($cliente) {
+                            Log::info('Actualizando datos de contacto del cliente', [
+                                'cliente_id' => $cliente->id,
+                            ]);
+                            
+                            $cliente->update([
+                                'email'      => $data['email'] ?? $cliente->email,
+                                'phone'      => $data['phone'] ?? $cliente->phone,
+                                'address'    => $data['address'] ?? $cliente->address,
+                                'occupation' => $data['occupation'] ?? $cliente->occupation,
+                                'canal_id'   => $data['canal_id'] ?? $cliente->canal_id,
+                            ]);
+                        }
+                    }
                 } else {
                     $cotizacion = $oportunidad->ultimaCotizacion;
                     Log::info('Usando cotización existente', [

@@ -19,6 +19,9 @@ use App\Http\Controllers\Admin\SucursalController as AdminSucursalController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Chat\PanelController;
 use App\Http\Controllers\CotizacionPdfController;
+use App\Http\Controllers\Admin\ReporteController;
+use App\Http\Controllers\Admin\RolController;
+use App\Http\Controllers\Admin\VehiculoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -165,7 +168,7 @@ Route::middleware(['auth'])->group(function () {
         return view('settings.index');
     })->name('settings.index');
 
-    // Menú de administración
+    // Menú de administración - Accesible para todos los usuarios autenticados
     Route::get('/admin', function () {
         return view('admin-menus');
     })->name('admin.menus');
@@ -193,48 +196,69 @@ Route::middleware(['auth'])->group(function () {
         return response()->json(['status' => 'error'], 401);
     })->name('user.heartbeat');
 
+    // Ruta de chat - Accesible para todos los usuarios autenticados
     Route::get('chat', [PanelController::class, 'index']);
 });
 
-// Rutas para sucursales y tiendas
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/tiendas', [App\Http\Controllers\Admin\TiendaController::class, 'index'])->name('tiendas');
-    Route::post('/sucursales', [App\Http\Controllers\Admin\SucursalController::class, 'store'])->name('sucursales.store');
-    Route::put('/sucursales/{sucursal}', [App\Http\Controllers\Admin\SucursalController::class, 'update'])->name('sucursales.update');
-    Route::delete('/sucursales/{sucursal}', [App\Http\Controllers\Admin\SucursalController::class, 'destroy'])->name('sucursales.destroy');
-
-    Route::post('/tiendas', [App\Http\Controllers\Admin\TiendaController::class, 'store'])->name('tiendas.store');
-    Route::put('/tiendas/{tienda}', [App\Http\Controllers\Admin\TiendaController::class, 'update'])->name('tiendas.update');
-    Route::delete('/tiendas/{tienda}', [App\Http\Controllers\Admin\TiendaController::class, 'destroy'])->name('tiendas.destroy');
-
-    // Rutas para vehículos
-    Route::get('/vehiculos', [App\Http\Controllers\Admin\VehiculoController::class, 'index'])->name('vehiculos');
-
-    // Rutas para marcas
-    Route::post('/vehiculos/marca', [App\Http\Controllers\Admin\VehiculoController::class, 'storeMarca'])->name('vehiculos.marca.store');
-    Route::put('/vehiculos/marca/{marca}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateMarca'])->name('vehiculos.marca.update');
-    Route::delete('/vehiculos/marca/{marca}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyMarca'])->name('vehiculos.marca.destroy');
-
-    // Rutas para modelos
-    Route::post('/vehiculos/modelo', [App\Http\Controllers\Admin\VehiculoController::class, 'storeModelo'])->name('vehiculos.modelo.store');
-    Route::put('/vehiculos/modelo/{modelo}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateModelo'])->name('vehiculos.modelo.update');
-    Route::delete('/vehiculos/modelo/{modelo}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyModelo'])->name('vehiculos.modelo.destroy');
-
-    // Rutas para versiones
-    Route::post('/vehiculos/version', [App\Http\Controllers\Admin\VehiculoController::class, 'storeVersion'])->name('vehiculos.version.store');
-    Route::put('/vehiculos/version/{version}', [App\Http\Controllers\Admin\VehiculoController::class, 'updateVersion'])->name('vehiculos.version.update');
-    Route::delete('/vehiculos/version/{version}', [App\Http\Controllers\Admin\VehiculoController::class, 'destroyVersion'])->name('vehiculos.version.destroy');
-
-    // Rutas para usuarios
-    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
-    Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
-    Route::delete('/usuarios/{usuario}', [UsuarioController::class, 'destroy'])->name('usuarios.destroy');
-
-    // Rutas de reportes
-    Route::get('/reportes', [App\Http\Controllers\Admin\ReporteController::class, 'index'])->name('reportes.index');
-    Route::get('reportes/antispam', [App\Http\Controllers\Admin\ReporteController::class, 'antispam'])->name('reportes.antispam');
+// Rutas para administración
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    // Eliminamos la definición duplicada y aplicamos middleware directamente al resource
+    Route::resource('usuarios', UsuarioController::class)
+        ->middleware('can:gestionar_usuarios|gestionar_usuarios_tienda|gestionar_usuarios_rol')
+        ->names('admin.usuarios');
+    
+    // Rutas de administración de roles
+    Route::resource('roles', \App\Http\Controllers\Admin\RolController::class)
+        ->names('admin.roles')
+        ->middleware('can:gestionar_roles');
+    
+    // Rutas para reportes
+    Route::get('reportes', [ReporteController::class, 'index'])
+        ->name('admin.reportes.index')
+        ->middleware('can:ver_reportes');
+        
+    Route::get('reportes/antispam', [ReporteController::class, 'antispam'])
+        ->name('admin.reportes.antispam')
+        ->middleware('can:ver_reportes');
+    
+    // Rutas para gestión de vehículos
+    Route::get('vehiculos', [VehiculoController::class, 'index'])
+        ->name('admin.vehiculos')
+        ->middleware('can:gestionar_vehiculos');
+        
+    Route::prefix('vehiculos')->middleware('can:gestionar_vehiculos')->group(function () {
+        // Rutas para marcas
+        Route::get('marcas', [VehiculoController::class, 'indexMarcas'])->name('admin.vehiculos.marcas');
+        Route::post('marcas', [VehiculoController::class, 'storeMarca'])->name('admin.vehiculos.marcas.store');
+        Route::put('marcas/{marca}', [VehiculoController::class, 'updateMarca'])->name('admin.vehiculos.marcas.update');
+        Route::delete('marcas/{marca}', [VehiculoController::class, 'destroyMarca'])->name('admin.vehiculos.marcas.destroy');
+        
+        // Rutas para modelos
+        Route::get('modelos', [VehiculoController::class, 'indexModelos'])->name('admin.vehiculos.modelos');
+        Route::post('modelos', [VehiculoController::class, 'storeModelo'])->name('admin.vehiculos.modelos.store');
+        Route::put('modelos/{modelo}', [VehiculoController::class, 'updateModelo'])->name('admin.vehiculos.modelos.update');
+        Route::delete('modelos/{modelo}', [VehiculoController::class, 'destroyModelo'])->name('admin.vehiculos.modelos.destroy');
+        
+        // Rutas para versiones
+        Route::get('versiones', [VehiculoController::class, 'indexVersiones'])->name('admin.vehiculos.versiones');
+        Route::post('versiones', [VehiculoController::class, 'storeVersion'])->name('admin.vehiculos.versiones.store');
+        Route::put('versiones/{version}', [VehiculoController::class, 'updateVersion'])->name('admin.vehiculos.versiones.update');
+        Route::delete('versiones/{version}', [VehiculoController::class, 'destroyVersion'])->name('admin.vehiculos.versiones.destroy');
+    });
+    
+    // Rutas para gestión de tiendas
+    Route::resource('tiendas', TiendaController::class)
+        ->names('admin.tiendas')
+        ->middleware('can:gestionar_tiendas');
+    
+    // Rutas para gestión de sucursales
+    Route::resource('sucursales', SucursalController::class)
+        ->names('admin.sucursales')
+        ->middleware('can:gestionar_tiendas');
 });
+
+// Registrar el middleware personalizado
+auth()->shouldUse('web');
 
 Route::get('/cotizaciones/{id}/pdf', [CotizacionPdfController::class, 'download'])->name('cotizaciones.pdf');
 

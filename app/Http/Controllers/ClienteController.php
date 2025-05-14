@@ -20,8 +20,8 @@ class ClienteController extends Controller
      */
     public function index()
     {
-        // Carga los clientes con su canal, paginados de a 10
-        $clientes = Cliente::with('canal')->paginate(10);
+        // Carga los clientes paginados sin intentar cargar el canal ansiosamente
+        $clientes = Cliente::paginate(10);
 
         // Para poblar el select del modal "Crear"
         $canales = CanalContacto::orderBy('nombre')->get();
@@ -34,20 +34,17 @@ class ClienteController extends Controller
      */
     public function store(Request $request)
     {
-        // dentro de store() y update():
+        // Validación para todos los campos del cliente
         $data = $request->validate([
             'dni_ruc'    => 'required|string|max:15|unique:clientes,dni_ruc,' . ($cliente->id ?? 'NULL'),
             'nombre'     => 'required|string|max:100',
-            'email'      => 'nullable|email|max:100',
-            'phone'      => 'nullable|string|max:50',
-            'address'    => 'nullable|string|max:150',
-            'occupation' => 'nullable|string|max:100',
-            'canal_id'   => 'nullable|exists:canales_contacto,id',
-            'fec_nac'    => 'nullable|date',  // <— añade validación
+            'fec_nac'    => 'nullable|date',
+            'email'      => 'nullable|email|max:255',
+            'phone'      => 'nullable|string|max:100',
         ]);
 
-
-        Cliente::create($data);
+        // Guardamos todos los datos del cliente
+        $cliente = Cliente::create($data);
 
         return redirect()
             ->route('clients.index')
@@ -88,19 +85,18 @@ class ClienteController extends Controller
      */
     public function update(Request $request, Cliente $cliente)
     {
-        // dentro de store() y update():
+        // Validación para todos los campos del cliente
         $data = $request->validate([
-            'dni_ruc'    => 'required|string|max:15|unique:clientes,dni_ruc,' . ($cliente->id ?? 'NULL'),
+            'dni_ruc'    => 'required|string|max:15|unique:clientes,dni_ruc,' . $cliente->id,
             'nombre'     => 'required|string|max:100',
-            'email'      => 'nullable|email|max:100',
-            'phone'      => 'nullable|string|max:50',
-            'address'    => 'nullable|string|max:150',
-            'occupation' => 'nullable|string|max:100',
-            'canal_id'   => 'nullable|exists:canales_contacto,id',
-            'fec_nac'    => 'nullable|date',  // <— añade validación
+            'fec_nac'    => 'nullable|date',
+            'email'      => 'nullable|email|max:255',
+            'phone'      => 'nullable|string|max:100',
         ]);
 
+        // Actualizamos todos los campos del cliente
         $cliente->update($data);
+        
         return redirect()
             ->route('clients.index')
             ->with('success', 'Cliente actualizado correctamente.');

@@ -28,7 +28,7 @@ class TiendaController extends Controller
 
         Tienda::create($request->all());
 
-        return Redirect::route('admin.tiendas')
+        return Redirect::route('admin.tiendas.index')
             ->with('success', 'Tienda creada exitosamente');
     }
 
@@ -42,7 +42,7 @@ class TiendaController extends Controller
 
         $tienda->update($request->all());
 
-        return Redirect::route('admin.tiendas')
+        return Redirect::route('admin.tiendas.index')
             ->with('success', 'Tienda actualizada exitosamente');
     }
 
@@ -50,7 +50,7 @@ class TiendaController extends Controller
     {
         $tienda->delete();
 
-        return Redirect::route('admin.tiendas')
+        return Redirect::route('admin.tiendas.index')
             ->with('success', 'Tienda eliminada exitosamente');
     }
 }
