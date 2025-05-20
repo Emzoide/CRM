@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SeguimientoController;
+use App\Http\Controllers\FiltroConfiguracionController;
 use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\VersionVehiculo;
@@ -16,6 +17,9 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Chat\MessageController;
 use App\Http\Controllers\ConsentimientoController;
 use App\Http\Controllers\WhatsAppController;
+use App\Models\Usuario;
+use App\Models\Rol;
+use App\Models\Tienda;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +34,30 @@ use App\Http\Controllers\WhatsAppController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Endpoint para pruebas de Groq/Ollama
+Route::post('/groq-chat', [\App\Http\Controllers\GroqChatController::class, 'chat']);
+
+// APIs para el sistema de filtros dinámico
+Route::middleware('auth')->group(function () {
+    // Obtener usuarios para el filtro
+    Route::get('/usuarios', function () {
+        return response()->json(Usuario::select('id', 'first_name', 'last_name', DB::raw("CONCAT(first_name, ' ', last_name) as nombre_completo"))
+            ->where('activo', true)
+            ->orderBy('first_name')
+            ->get());
+    });
+    
+    // Obtener roles para el filtro
+    Route::get('/roles', function () {
+        return response()->json(Rol::select('id', 'nombre', 'is_admin')->orderBy('nombre')->get());
+    });
+    
+    // Obtener tiendas para el filtro
+    Route::get('/tiendas', function () {
+        return response()->json(Tienda::select('id', 'nombre')->orderBy('nombre')->get());
+    });
 });
 
 // Rutas para marcas, modelos y versiones
@@ -334,4 +362,4 @@ Route::prefix('reportes')->group(function () {
 Route::post('/whatsapp/webhook/template', [App\Http\Controllers\Api\WhatsAppWebhookController::class, 'sendTemplate']);
 
 Route::post('/whatsapp/send-contact', [WhatsAppController::class, 'sendContactTemplate']);
-Route::post('/whatsapp/send-reactivation', [WhatsAppController::class, 'sendReactivationTemplate']);
+Route::post('/whatsapp/send-reactivation', [WhatsAppController::class, 'sendReactivation']);

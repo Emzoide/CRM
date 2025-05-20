@@ -181,6 +181,17 @@ Route::middleware(['auth'])->group(function () {
     // Tiendas y Sucursales
     Route::resource('tiendas', TiendaController::class);
     Route::resource('sucursales', SucursalController::class);
+    
+    // Filtros de configuración
+    Route::resource('filtros', FiltroConfiguracionController::class);
+
+    // Ruta para probar el chatbot de posventa
+    Route::get('/chatbot-test', function () {
+        return view('chatbot-test');
+    });
+
+
+    Route::post('/filtros/{id}/predeterminado', [FiltroConfiguracionController::class, 'setPredeterminado'])->name('filtros.predeterminado');
 
     Route::get('/admin/sucursales', [AdminSucursalController::class, 'index'])->name('admin.sucursales');
 

@@ -240,7 +240,10 @@ class WhatsAppController extends Controller
     /**
      * Envía una plantilla de reactivación a un contacto
      */
-    public function sendReactivationTemplate(Request $request)
+    /**
+     * Envía una plantilla de reactivación a un contacto usando el método especializado
+     */
+    public function sendReactivation(Request $request)
     {
         try {
             // Validar los datos de entrada
@@ -262,43 +265,15 @@ class WhatsAppController extends Controller
                 $normalizedNumber = '51' . $normalizedNumber;
             }
 
-            // Preparar los parámetros para el template
-            $payload = [
-                // Header parameter
-                [
-                    'type' => 'text',
-                    'parameter_name' => 'header',
-                    'text' => 'Tu próximo paso nos importa.',
-                    'component' => 'header'
-                ],
-                // Body parameters
-                [
-                    'type' => 'text',
-                    'parameter_name' => 'contacto_nombre',
-                    'text' => $request->contacto_nombre,
-                    'component' => 'body'
-                ],
-                // Button parameters
-                [
-                    'type' => 'text',
-                    'parameter_name' => 'button_0_1',
-                    'text' => $request->chatbot_id,
-                    'component' => 'button',
-                    'button_index' => '0',
-                    'param_number' => '1'
-                ]
-            ];
-
-            // Enviar el template
-            $result = $this->whatsAppService->sendTemplate(
+            // Llamar al método específico para la plantilla de reactivación
+            $result = $this->whatsAppService->sendReactivationTemplate(
                 $normalizedNumber,
-                'reactivacion',
-                'es_PE',
-                $payload
+                $request->contacto_nombre,
+                $request->chatbot_id
             );
 
             if (!$result['success']) {
-                Log::error('Error al enviar el template de reactivación', [
+                Log::error('Error al enviar la plantilla de reactivación', [
                     'numero' => $normalizedNumber,
                     'error' => $result['error']
                 ]);
@@ -351,7 +326,11 @@ class WhatsAppController extends Controller
                 'conversation_id' => $conversation->id,
                 'from_me' => true,
                 'message_type' => 'template',
-                'content' => json_encode($payload),
+                'content' => json_encode([
+                    'template' => 'reactivacion',
+                    'contacto_nombre' => $request->contacto_nombre,
+                    'chatbot_id' => $request->chatbot_id
+                ]),
                 'timestamp' => now(),
                 'status' => 'sent'
             ]);

@@ -9,8 +9,13 @@ use Illuminate\Support\Facades\Log;
 use App\Models\VersionVehiculo;
 use App\Models\Banco;
 use App\Models\Marca;
+use App\Models\FiltroConfiguracion;
+use App\Models\Rol;
+use App\Models\Tienda;
+use App\Services\FiltroClienteService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 
 
 class ClienteController extends Controller
@@ -18,15 +23,66 @@ class ClienteController extends Controller
     /**
      * Muestra el listado de clientes y los datos para los modales de crear/editar.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Carga los clientes paginados sin intentar cargar el canal ansiosamente
-        $clientes = Cliente::paginate(10);
-
-        // Para poblar el select del modal "Crear"
-        $canales = CanalContacto::orderBy('nombre')->get();
-
-        return view('clients.index', compact('clientes', 'canales'));
+        try {
+            $usuario = Auth::user();
+            $query = Cliente::query();
+            
+            // Obtener el filtro seleccionado o el predeterminado
+            $filtroId = $request->input('filtro_id');
+            $filtro = null;
+            
+            if ($filtroId) {
+                // Buscar el filtro solicitado (verificando permisos)
+                $filtro = FiltroConfiguracion::disponiblesParaUsuario($usuario)
+                    ->where('id', $filtroId)
+                    ->first();
+            }
+            
+            // Si no hay filtro específico o no se encontró, usar el predeterminado
+            if (!$filtro) {
+                $filtro = FiltroConfiguracion::obtenerPredeterminadoParaUsuario($usuario);
+            }
+            
+            // Aplicar el filtro si existe
+            if ($filtro) {
+                $query = $filtro->aplicarAConsulta($query);
+            }
+            
+            // Procesar filtros personalizados de la solicitud actual
+            $filtroPersonalizado = $request->input('filtro_personalizado');
+            if ($filtroPersonalizado) {
+                $configuracion = json_decode($filtroPersonalizado, true);
+                if ($configuracion) {
+                    $query = app(FiltroClienteService::class)->aplicarFiltros($query, $configuracion);
+                }
+            }
+            
+            // Obtener clientes paginados
+            $clientes = $query->paginate(10);
+            
+            // Para poblar el select del modal "Crear"
+            $canales = CanalContacto::orderBy('nombre')->get();
+            
+            // Obtener filtros disponibles para el usuario
+            $filtrosDisponibles = FiltroConfiguracion::disponiblesParaUsuario($usuario)
+                ->orderBy('rol_id')
+                ->orderBy('orden')
+                ->get();
+                
+            // Obtener roles para filtros
+            $roles = Rol::all();
+            
+            // Obtener tiendas para filtros
+            $tiendas = Tienda::all();
+            
+            return view('clients.index', compact('clientes', 'canales', 'filtrosDisponibles', 'filtro', 'roles', 'tiendas'));
+            
+        } catch (\Exception $e) {
+            Log::error('Error en ClienteController@index: ' . $e->getMessage());
+            return back()->withErrors('Ha ocurrido un error al cargar los clientes.');
+        }
     }
 
     /**

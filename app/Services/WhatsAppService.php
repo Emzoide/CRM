@@ -230,4 +230,125 @@ class WhatsAppService
             ];
         }
     }
+
+    /**
+     * Envía la plantilla específica de reactivación ("reactivacion") con parámetros nombrados para header, body y button.
+     *
+     * @param string $to Número de WhatsApp (E.164)
+     * @param string $contacto_nombre Nombre del contacto
+     * @param string $chatbot_id ID para el botón URL
+     * @return array Resultado del envío
+     */
+    public function sendReactivationTemplate(string $to, string $contacto_nombre, string $chatbot_id): array
+    {
+        try {
+            $token = $this->tokenService->getToken();
+            if (!$token) {
+                Log::error('No se pudo obtener un token válido para enviar la plantilla de reactivación');
+                return [
+                    'success' => false,
+                    'status' => 401,
+                    'error' => 'Token inválido'
+                ];
+            }
+
+            // Construir los componentes según la plantilla "reactivacion"
+            $components = [
+                [
+                    'type' => 'header',
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $contacto_nombre,
+                            'parameter_name' => 'contacto_nombre'
+                        ]
+                    ]
+                ],
+                [
+                    'type' => 'body',
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $contacto_nombre,
+                            'parameter_name' => 'contacto_nombre'
+                        ]
+                    ]
+                ],
+                [
+                    'type' => 'button',
+                    'sub_type' => 'url',
+                    'index' => 0,
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $chatbot_id
+                        ]
+                    ]
+                ]
+            ];
+
+            $finalPayload = [
+                'messaging_product' => 'whatsapp',
+                'to' => $to,
+                'type' => 'template',
+                'template' => [
+                    'name' => 'reactivacion',
+                    'language' => [
+                        'code' => 'es_PE',
+                        'policy' => 'deterministic'
+                    ],
+                    'components' => $components
+                ]
+            ];
+
+            $response = Http::withToken($token)
+                ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $finalPayload);
+
+            if ($response->status() === 401) {
+                if ($token = $this->tokenService->renewToken()) {
+                    $response = Http::withToken($token)
+                        ->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", $finalPayload);
+                } else {
+                    Log::error('No se pudo renovar el token para enviar la plantilla de reactivación');
+                    return [
+                        'success' => false,
+                        'status' => 401,
+                        'error' => 'No se pudo renovar el token'
+                    ];
+                }
+            }
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('Plantilla de reactivación enviada exitosamente', [
+                    'message_id' => $data['messages'][0]['id'] ?? null
+                ]);
+                return [
+                    'success' => true,
+                    'status' => $response->status(),
+                    'message_id' => $data['messages'][0]['id'] ?? null
+                ];
+            }
+
+            $error = $response->json();
+            Log::error('Error al enviar plantilla de reactivación', [
+                'status' => $response->status(),
+                'response' => $error
+            ]);
+            return [
+                'success' => false,
+                'status' => $response->status(),
+                'error' => $error['error']['message'] ?? 'Error desconocido al enviar plantilla de reactivación'
+            ];
+        } catch (\Throwable $e) {
+            Log::error('Excepción al enviar plantilla de reactivación', [
+                'message' => $e->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
 }
