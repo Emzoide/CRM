@@ -46,6 +46,11 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
+
+            Route::prefix('api')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/chat.php'));
         });
     }
 
@@ -59,5 +64,28 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+    }
+
+    /**
+     * Define the routes for the application.
+     *
+     * @return void
+     */
+    protected function map()
+    {
+        $this->mapApiRoutes();
+        $this->mapWebRoutes();
+    }
+
+    /**
+     * Define the "chat" routes for the application.
+     *
+     * @return void
+     */
+    protected function mapChatRoutes()
+    {
+        Route::middleware('api')
+            ->namespace($this->namespace)
+            ->group(base_path('routes/chat.php'));
     }
 }

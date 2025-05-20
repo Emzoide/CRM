@@ -192,6 +192,9 @@ if ($activa && in_array($activa->etapa_actual, ['won','lost'])) $sinOportActiva 
             {{-- El contenido se cargará dinámicamente --}}
         </div>
         <div class="modal-footer">
+            <button type="button" onclick="descargarCotizacionPDF()" class="btn btn-primary">
+                <i class="fas fa-download mr-2"></i>Descargar PDF
+            </button>
             <button type="button" onclick="closeCotizacionActivaModal()" class="btn btn-secondary">Cerrar</button>
             <button type="button" onclick="mostrarFormularioRechazo()" class="btn btn-danger">Cerrar Cotización</button>
         </div>
@@ -252,6 +255,10 @@ if ($activa && in_array($activa->etapa_actual, ['won','lost'])) $sinOportActiva 
         </div>
     </div>
 </div>
+
+{{-- Agregar las librerías necesarias --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
     .modal {
@@ -487,9 +494,72 @@ if ($activa && in_array($activa->etapa_actual, ['won','lost'])) $sinOportActiva 
             .then(data => {
                 if (data.success && data.data.cotizacion_activa) {
                     const cotizacion = data.data.cotizacion_activa;
-                    cotizacionActualId = cotizacion.id; // Guardar el ID de la cotización actual
-                    console.log('cotizacionActualId: ', cotizacionActualId);
-                    // ... resto del código existente ...
+                    const cliente = data.data.cotizacion_activa.cliente;
+                    const vehiculo = data.data.cotizacion_activa.vehiculo_detalle;
+                    const banco = data.data.cotizacion_activa.banco;
+
+                    cotizacionActualId = cotizacion.id;
+
+                    // Actualizar el contenido del modal
+                    if (cotizacionContent) {
+                        cotizacionContent.innerHTML = `
+                            <div class="cotizacion-info">
+                                <div class="cotizacion-info-header">
+                                    <h2 class="cotizacion-info-title">Cotización Activa</h2>
+                                    <p class="cotizacion-info-date">Fecha: ${new Date(cotizacion.created_at).toLocaleDateString()}</p>
+                                </div>
+                                <div class="cotizacion-info-section">
+                                    <h3 class="cotizacion-info-subtitle">Información del Cliente</h3>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Nombre:</span>
+                                        <span class="cotizacion-info-value">${cliente.nombre}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Email:</span>
+                                        <span class="cotizacion-info-value">${cliente.email}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Teléfono:</span>
+                                        <span class="cotizacion-info-value">${cliente.telefono}</span>
+                                    </div>
+                                </div>
+                                <div class="cotizacion-info-section">
+                                    <h3 class="cotizacion-info-subtitle">Información del Vehículo</h3>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Marca:</span>
+                                        <span class="cotizacion-info-value">${vehiculo.marca.nombre}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Modelo:</span>
+                                        <span class="cotizacion-info-value">${vehiculo.modelo.nombre}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Versión:</span>
+                                        <span class="cotizacion-info-value">${vehiculo.version.nombre}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Precio Unitario:</span>
+                                        <span class="cotizacion-info-value">${vehiculo.precio_unitario.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}</span>
+                                    </div>
+                                </div>
+                                <div class="cotizacion-info-section">
+                                    <h3 class="cotizacion-info-subtitle">Información de la Cotización</h3>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Tipo de Compra:</span>
+                                        <span class="cotizacion-info-value">${cotizacion.tipo_compra === 'credito' ? 'Financiado' : 'Contado'}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Seguro Vehicular:</span>
+                                        <span class="cotizacion-info-value">${cotizacion.seguro_vehicular ? 'Sí' : 'No'}</span>
+                                    </div>
+                                    <div class="cotizacion-info-item">
+                                        <span class="cotizacion-info-label">Banco:</span>
+                                        <span class="cotizacion-info-value">${banco ? banco.nombre : 'Sin especificar'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
                 }
             })
             .catch(error => {
@@ -579,6 +649,54 @@ if ($activa && in_array($activa->etapa_actual, ['won','lost'])) $sinOportActiva 
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         }
+    }
+
+    function descargarCotizacionPDF() {
+        const element = document.getElementById('cotizacionContent');
+        const modal = document.getElementById('cotizacionActivaModal');
+
+        // Ocultar los botones del footer temporalmente
+        const footer = modal.querySelector('.modal-footer');
+        const originalDisplay = footer.style.display;
+        footer.style.display = 'none';
+
+        html2canvas(element, {
+            scale: 2, // Mejor calidad
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            // Agregar el logo o encabezado si lo tienes
+            // pdf.addImage(logoData, 'PNG', 10, 10, 30, 30);
+
+            // Agregar el contenido
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            // Agregar pie de página
+            const pageCount = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(8);
+                pdf.text('Documento generado automáticamente por el CRM', pdfWidth / 2, pdf.internal.pageSize.getHeight() - 10, {
+                    align: 'center'
+                });
+                pdf.text(`Página ${i} de ${pageCount}`, pdfWidth / 2, pdf.internal.pageSize.getHeight() - 5, {
+                    align: 'center'
+                });
+            }
+
+            // Restaurar los botones del footer
+            footer.style.display = originalDisplay;
+
+            // Descargar el PDF
+            pdf.save('cotizacion.pdf');
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {

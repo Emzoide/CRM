@@ -299,32 +299,24 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar las pestañas de Bootstrap
+        // Inicializar las pestañas usando Bootstrap 5
         var triggerTabList = [].slice.call(document.querySelectorAll('#myTab button'))
-        triggerTabList.forEach(function(triggerEl) {
-            var tabTrigger = new bootstrap.Tab(triggerEl)
-            triggerEl.addEventListener('click', function(event) {
-                event.preventDefault()
-                tabTrigger.show()
-            })
+        triggerTabList.forEach(function (tabEl) {
+            // Crear nueva instancia de Tab para cada elemento
+            new bootstrap.Tab(tabEl)
         })
+
+        // Activar la primera pestaña por defecto
+        var firstTab = document.querySelector('#tiendas-tab')
+        if (firstTab) {
+            var bsTab = new bootstrap.Tab(firstTab)
+            bsTab.show()
+        }
 
         // Inicializar los modales
-        var modals = document.querySelectorAll('.admin-modal')
-        modals.forEach(function(modal) {
-            new bootstrap.Modal(modal, {
-                backdrop: 'static',
-                keyboard: false
-            })
-        })
-
-        // Manejar el cierre de modales
-        var closeButtons = document.querySelectorAll('.admin-modal-close')
-        closeButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                var modal = bootstrap.Modal.getInstance(this.closest('.admin-modal'))
-                modal.hide()
-            })
+        var modalElements = document.querySelectorAll('.modal')
+        modalElements.forEach(function (modalEl) {
+            new bootstrap.Modal(modalEl)
         })
 
         // Animaciones para las tablas

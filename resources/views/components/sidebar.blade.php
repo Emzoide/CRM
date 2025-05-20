@@ -44,7 +44,9 @@
                         </a>
                     </li> -->
 
+                    @auth
                     <!-- Clientes -->
+                    @if(Auth::user()->tienePermiso('gestionar_clientes'))
                     <li class="sidebar-menu-item" data-tooltip="CLIENTES">
                         <a href="/clients" class="sidebar-menu-link">
                             <div class="sidebar-menu-icon">
@@ -53,48 +55,36 @@
                             <span class="sidebar-menu-text">CLIENTES</span>
                         </a>
                     </li>
+                    @endif
 
-                    <!-- Administrador -->
-                    @if(Auth::user()->rol == 'admin')
-                    <li class="sidebar-menu-item has-submenu" data-tooltip="ADMINISTRADOR">
-                        <a href="#" class="sidebar-menu-link">
+                    <!-- Chats -->
+                    @if(Auth::user()->tienePermiso('gestionar_chat'))
+                    <li class="sidebar-menu-item" data-tooltip="CHATS">
+                        <a href="/chat" class="sidebar-menu-link">
                             <div class="sidebar-menu-icon">
-                                <!-- <i class="fas fa-ellipsis-h"></i> -->
-                                <i class="fas fa-cog"></i>
+                                <i class="fas fa-comment-dots"></i>
                             </div>
-                            <span class="sidebar-menu-text">ADMINISTRADOR</span>
-                            <span class="sidebar-menu-arrow">
-                                <i class="fas fa-chevron-down"></i>
-                            </span>
+                            <span class="sidebar-menu-text">CHATS</span>
                         </a>
-                        <ul class="sidebar-submenu">
-                            <li class="sidebar-submenu-item">
-                                <a href="{{ route('admin.tiendas') }}" class="sidebar-submenu-link">
-                                    <i class="fas fa-store sidebar-submenu-icon"></i>
-                                    <span class="sidebar-submenu-text">Sucursales</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-submenu-item">
-                                <a href="{{ route('admin.vehiculos') }}" class="sidebar-submenu-link">
-                                    <i class="fas fa-car sidebar-submenu-icon"></i>
-                                    <span class="sidebar-submenu-text">Vehículos</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-submenu-item">
-                                <a href="{{ route('admin.usuarios.index') }}" class="sidebar-submenu-link">
-                                    <i class="fas fa-users sidebar-submenu-icon"></i>
-                                    <span class="sidebar-submenu-text">Usuarios</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-submenu-item">
-                                <a href="{{ route('admin.menus') }}" class="sidebar-submenu-link">
-                                    <i class="fas fa-ellipsis-h sidebar-submenu-icon"></i>
-                                    <span class="sidebar-submenu-text">Otros</span>
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     @endif
+
+                    <!-- Administración -->
+                    @if(Auth::user()->tienePermiso('gestionar_usuarios') ||
+                    Auth::user()->tienePermiso('gestionar_tiendas') ||
+                    Auth::user()->tienePermiso('gestionar_sucursales') ||
+                    Auth::user()->tienePermiso('gestionar_reportes'))
+                    <li class="sidebar-menu-item" data-tooltip="ADMINISTRACIÓN">
+                        <a href="/admin" class="sidebar-menu-link">
+                            <div class="sidebar-menu-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <span class="sidebar-menu-text">ADMINISTRACIÓN</span>
+                        </a>
+                    </li>
+                    @endif
+                    @endauth
+
                     <!-- Otros (Con submenú) hola git -->
                     <li class="sidebar-menu-item has-submenu" data-tooltip="OTROS">
                         <a href="#" class="sidebar-menu-link">
@@ -113,12 +103,16 @@
                                     <span class="sidebar-submenu-text">Inventario</span>
                                 </a>
                             </li> -->
+                            @auth
+                            @if(Auth::user()->rol == 'admin')
                             <li class="sidebar-submenu-item">
-                                <a href="#" class="sidebar-submenu-link">
+                                <a href="/admin/reportes" class="sidebar-submenu-link">
                                     <i class="fas fa-chart-bar sidebar-submenu-icon"></i>
                                     <span class="sidebar-submenu-text">Reportes</span>
                                 </a>
                             </li>
+                            @endif
+                            @endauth
                             <li class="sidebar-submenu-item">
                                 <a href="#" class="sidebar-submenu-link">
                                     <i class="fas fa-cog sidebar-submenu-icon"></i>
@@ -127,6 +121,7 @@
                             </li>
                         </ul>
                     </li>
+
                     <!-- Ventas
                     <li class="sidebar-menu-item" data-tooltip="VENTAS">
                         <a href="#" class="sidebar-menu-link">
@@ -140,6 +135,7 @@
             </nav>
         </div>
 
+        @auth
         @php
         $nombreCompleto = Auth::user()->first_name;
         $partes = explode(" ", $nombreCompleto);
@@ -151,7 +147,8 @@
         'admin' => 'Administrador',
         'seller' => 'Asesor',
         'user' => 'Usuario',
-        'supervisor'=> 'Supervisor'
+        'supervisor'=> 'Supervisor',
+        'callcenter' => 'Call Center'
         ];
         @endphp
         <!-- Perfil de Usuario -->
@@ -163,10 +160,15 @@
                 </div>
                 <div class="user-info">
                     <div class="user-name">{{ $nombre . " " . $apellido }}</div>
-                    <div class="user-email">{{ $roles[Auth::user()->rol] }}</div>
+                    <div class="user-email">
+                        @foreach(Auth::user()->roles as $rol)
+                        <span class="badge bg-primary">{{ $rol->nombre }}</span>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
+        @endauth
     </aside>
 
     <!-- Botón de toggle para móviles -->

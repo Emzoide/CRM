@@ -29,7 +29,7 @@ class SucursalController extends Controller
 
         Sucursal::create($request->only('nombre'));
 
-        return Redirect::route('admin.sucursales')
+        return Redirect::route('admin.tiendas.index')
             ->with('success', 'Sucursal creada exitosamente');
     }
 
@@ -41,7 +41,7 @@ class SucursalController extends Controller
 
         $sucursal->update($request->only('nombre'));
 
-        return Redirect::route('admin.sucursales')
+        return Redirect::route('admin.tiendas.index')
             ->with('success', 'Sucursal actualizada exitosamente');
     }
 
@@ -49,7 +49,7 @@ class SucursalController extends Controller
     {
         $sucursal->delete();
 
-        return Redirect::route('admin.sucursales')
+        return Redirect::route('admin.tiendas.index')
             ->with('success', 'Sucursal eliminada exitosamente');
     }
 }

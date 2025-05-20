@@ -20,7 +20,7 @@ class CotizacionGestionController extends Controller
             return back()->withErrors('No se puede crear cotización en una oportunidad cerrada.');
         }
 
-        // 2. Validar datos solo de cotización
+        // 2. Validar datos de cotización y datos de contacto
         $data = $request->validate([
             'version_vehiculo_id' => 'required|exists:versiones_vehiculo,id',
             'precio_unit'         => 'required|numeric|min:0',
@@ -33,6 +33,13 @@ class CotizacionGestionController extends Controller
             'seguro_vehicular'    => 'required|boolean',
             'razon_no_seguro'     => 'nullable|required_if:seguro_vehicular,0|string|max:200',
             'observacion_call_center' => 'nullable|string|max:500',
+            // Campos de contacto
+            'email'               => 'nullable|email|max:100',
+            'phone'               => 'nullable|string|max:50',
+            'address'             => 'nullable|string|max:150',
+            'occupation'          => 'nullable|string|max:100',
+            'canal_id'            => 'nullable|exists:canales_contacto,id',
+            'update_client_info'  => 'sometimes|boolean',
         ]);
 
         // 3. Crear cotización y detalle en transacción
@@ -58,7 +65,26 @@ class CotizacionGestionController extends Controller
                 'seguro_vehicular'  => $data['seguro_vehicular'],
                 'razon_no_seguro'   => $data['razon_no_seguro'] ?? null,
                 'observacion_call_center' => $data['observacion_call_center'] ?? null,
+                // Datos de contacto para esta cotización
+                'email'             => $data['email'] ?? null,
+                'phone'             => $data['phone'] ?? null,
+                'address'           => $data['address'] ?? null,
+                'occupation'        => $data['occupation'] ?? null,
             ]);
+
+            // 3.2.1 Actualizar información del cliente si se solicitó
+            if (!empty($data['update_client_info'])) {
+                $cliente = $oportunidad->cliente;
+                if ($cliente) {
+                    $cliente->update([
+                        'email'      => $data['email'] ?? $cliente->email,
+                        'phone'      => $data['phone'] ?? $cliente->phone,
+                        'address'    => $data['address'] ?? $cliente->address,
+                        'occupation' => $data['occupation'] ?? $cliente->occupation,
+                        'canal_id'   => $data['canal_id'] ?? $cliente->canal_id,
+                    ]);
+                }
+            }
 
             // 3.3. Crear detalle de cotización
             DetalleCotizacion::create([

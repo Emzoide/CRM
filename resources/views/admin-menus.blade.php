@@ -87,40 +87,75 @@
     </div>
 
     <div class="admin-menu-grid">
-        <a href="{{ route('admin.sucursales') }}" class="admin-menu-card">
+        {{-- Mostrar opción de Sucursales --}}
+        @if(Auth::user()->tieneAlgunPermiso(['gestionar_sucursales', 'gestionar_tiendas']))
+        <a href="{{ route('admin.sucursales.index') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
                 <i class="fas fa-store"></i>
             </div>
             <h2 class="admin-menu-title">Sucursales</h2>
         </a>
+        @endif
 
-        <a href="{{ route('admin.vehiculos') }}" class="admin-menu-card">
-            <div class="admin-menu-icon">
-                <i class="fas fa-car"></i>
-            </div>
-            <h2 class="admin-menu-title">Vehículos</h2>
-        </a>
-
+        {{-- Mostrar opción de Usuarios - Cualquier usuario con permisos de gestión de usuarios puede ver esta opción --}}
+        @if(Auth::user()->tieneAlgunPermiso(['gestionar_usuarios', 'gestionar_usuarios_tienda', 'gestionar_usuarios_rol']))
         <a href="{{ route('admin.usuarios.index') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
                 <i class="fas fa-users"></i>
             </div>
             <h2 class="admin-menu-title">Usuarios</h2>
         </a>
+        @endif
 
-        <a href="#" class="admin-menu-card">
+        {{-- Mostrar opción de Roles - Solo administradores pueden gestionar roles --}}
+        @if(Auth::user()->tienePermiso('gestionar_roles'))
+        <a href="{{ route('admin.roles.index') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
-                <i class="fas fa-university"></i>
+                <i class="fas fa-user-tag"></i>
             </div>
-            <h2 class="admin-menu-title">Bancos</h2>
+            <h2 class="admin-menu-title">Roles</h2>
         </a>
+        @endif
 
-        <a href="#" class="admin-menu-card">
+        {{-- Mostrar opción de Tiendas --}}
+        @if(Auth::user()->tieneAlgunPermiso(['gestionar_tiendas', 'gestionar_usuarios_tienda']))
+        <a href="{{ route('admin.tiendas.index') }}" class="admin-menu-card">
             <div class="admin-menu-icon">
-                <i class="fas fa-address-book"></i>
+                <i class="fas fa-store-alt"></i>
             </div>
-            <h2 class="admin-menu-title">Medios de contacto</h2>
+            <h2 class="admin-menu-title">Tiendas</h2>
         </a>
+        @endif
+
+        {{-- Mostrar opción de Reportes --}}
+        @if(Auth::user()->tieneAlgunPermiso(['ver_reportes', 'gestionar_reportes']))
+        <a href="{{ route('admin.reportes.index') }}" class="admin-menu-card">
+            <div class="admin-menu-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h2 class="admin-menu-title">Reportes</h2>
+        </a>
+        @endif
+
+        {{-- Mostrar opción de Vehículos --}}
+        @if(Auth::user()->tieneAlgunPermiso(['gestionar_vehiculos', 'ver_vehiculos']))
+        <a href="{{ url('/admin/vehiculos') }}" class="admin-menu-card">
+            <div class="admin-menu-icon">
+                <i class="fas fa-car"></i>
+            </div>
+            <h2 class="admin-menu-title">Vehículos</h2>
+        </a>
+        @endif
+        
+        {{-- Mostrar opción de Chat --}}
+        @if(Auth::user()->tienePermiso('acceder_chat'))
+        <a href="{{ url('chat') }}" class="admin-menu-card">
+            <div class="admin-menu-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h2 class="admin-menu-title">Chat</h2>
+        </a>
+        @endif
     </div>
 </div>
 @endsection

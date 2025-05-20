@@ -113,6 +113,42 @@
                 </div>
             </div>
 
+            {{-- Información de Contacto --}}
+            <div class="card mt-3 mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Información de Contacto</h5>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="update_client_info" id="update_client_info" value="1">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" class="form-control" value="{{ $cliente->email }}" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Teléfono</label>
+                        <input type="text" name="phone" id="phone" class="form-control" value="{{ $cliente->phone }}" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Dirección</label>
+                        <input type="text" name="address" id="address" class="form-control" value="{{ $cliente->address }}" maxlength="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="occupation">Ocupación</label>
+                        <input type="text" name="occupation" id="occupation" class="form-control" value="{{ $cliente->occupation }}" maxlength="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="canal_id">Canal de Contacto</label>
+                        <select name="canal_id" class="form-control" id="canalContactoSelect">
+                            <option value="">Seleccione un canal</option>
+                            @foreach(\App\Models\CanalContacto::orderBy('nombre')->get() as $canal)
+                                <option value="{{ $canal->id }}" {{ $cliente->canal_id == $canal->id ? 'selected' : '' }}>{{ $canal->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="observacion_call_center">Observaciones</label>
                 <textarea name="observacion_call_center" class="form-control" rows="3" maxlength="500"></textarea>
@@ -120,7 +156,7 @@
 
             <div class="modal-footer">
                 <button type="button" onclick="closeNuevaCotizacionModal()" class="btn btn-secondary">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Guardar Cotización</button>
+                <button type="button" id="btnGuardarCotizacion" class="btn btn-primary">Guardar Cotización</button>
             </div>
         </form>
     </div>
@@ -282,6 +318,41 @@
                     razonNoSeguro.style.display = 'none';
                     razonNoSeguroInput.removeAttribute('required');
                     razonNoSeguroInput.value = '';
+                }
+            });
+        }
+
+        // Botón de guardar cotización con confirmación
+        const btnGuardarCotizacion = document.getElementById('btnGuardarCotizacion');
+        if (btnGuardarCotizacion) {
+            btnGuardarCotizacion.addEventListener('click', function() {
+                // Comprobar si ha cambiado algún dato de contacto respecto al cliente original
+                const originalEmail = '{{ $cliente->email }}';
+                const originalPhone = '{{ $cliente->phone }}';
+                const originalAddress = '{{ $cliente->address }}';
+                const originalOccupation = '{{ $cliente->occupation }}';
+                
+                const currentEmail = document.getElementById('email').value;
+                const currentPhone = document.getElementById('phone').value;
+                const currentAddress = document.getElementById('address').value;
+                const currentOccupation = document.getElementById('occupation').value;
+                
+                const hasChanges = 
+                    originalEmail !== currentEmail || 
+                    originalPhone !== currentPhone || 
+                    originalAddress !== currentAddress || 
+                    originalOccupation !== currentOccupation;
+                
+                if (hasChanges) {
+                    // Mostrar modal de confirmación
+                    if (confirm('¿Confirma actualizar la información de contacto del cliente? Los datos actualizados se guardarán tanto en esta cotización como en el perfil del cliente.')) {
+                        // Si confirma, enviar el formulario
+                        document.getElementById('update_client_info').value = '1';
+                        document.getElementById('nuevaCotizacionForm').submit();
+                    }
+                } else {
+                    // Si no hay cambios, simplemente enviar el formulario
+                    document.getElementById('nuevaCotizacionForm').submit();
                 }
             });
         }
